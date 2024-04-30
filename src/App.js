@@ -26,7 +26,7 @@ function App() {
       stmt += _expr;
     }
 
-    stmt = `create or replace temp materialized view ${newViewName} as (${stmt}) using table properties (ttl=5)`;
+    stmt = `create or replace temp materialized view ${newViewName} as (${stmt}) using table properties (ttl=3)`;
     console.log('createLayerFiltersStmt: ', stmt);
     return stmt;
   };
