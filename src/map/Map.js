@@ -12,6 +12,7 @@ function Map(props) {
     const [map] = useState(
         new OlMap({
             zoomControl: false,
+            pixelRatio: 1, // Reduce Pixel ratio from default 1.5 to work on retina displays
             target: undefined,
             layers: [
                 new OlLayerTile({

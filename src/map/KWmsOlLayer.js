@@ -207,6 +207,7 @@ export const KWmsOlLayer = (props) => {
         } else {
             const wmsSource = new OlImageWMS({
                 url: wmsApiUrl,
+                ratio: 1,
                 params: requestParams,
                 serverType: 'geoserver',
                 crossOrigin: 'anonymous',
