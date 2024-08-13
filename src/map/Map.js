@@ -22,6 +22,7 @@ function Map(props) {
                         wrapX: true,
                         noWrap: false,
                     }),
+                    className: 'ol_bw',
                 }),
             ],
             overlays: [],
