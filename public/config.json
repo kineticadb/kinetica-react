@@ -10,10 +10,7 @@
             "view": "demo.nyctaxi",
             "baseTable": "demo.nyctaxi",
             "blurRadius": 5,
-            "pointSize": 5,
-            "fillColor": "ff00ff",
-            "borderColor": "00ff00",
-            "heatMapAttr": null,
+            "colormap": "magma",
             "wkt": "",
             "longitude": "pickup_longitude",
             "latitude": "pickup_latitude"
