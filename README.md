@@ -7,6 +7,7 @@ This is an example project to show developers how use Kinetica WMS with React an
 1. Set kUrl to the kinetica url i.e. http(s)://localhost:9191
 2. Set kUser and kPass to a Kinetica user's username and password
 3. Import the nyctaxi demo data in GAdmin. Navigate to Cluster(top panel) -> Demo(left side panel) -> Load More Data(green button under taxi). Alternatively you could change the WMS styling options in kineticaSettings to an existing table in your Kinetica instance.
+4. Import the ./data/ki_home.us_states.csv into Kinetica with workbench.  Click on the Files tab on the left -> Click the '+' under the Files tab and select "Upload New File".  Select a folder and upload the ./data/ki_home.us_states.csv.  After the file imports click the "Import" button. Click the Next button twice reach the "Destination" step.  Fill in the schema as ki_home and leave the table name us_states. Click the purple Import button.
 
 ## Available Scripts
 

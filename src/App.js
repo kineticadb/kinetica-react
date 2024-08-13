@@ -12,6 +12,8 @@ function App() {
   const [errorMsg, setErrorMsg] = useState(undefined);
   const [wmsErrorMsg, setWmsErrorMsg] = useState(undefined);
   const [mapLayers, setMapLayers] = useState([]);
+  const [selectedTable, setSelectedTable] = useState(null);
+
 
   const createLayerFiltersStmt = (expression, origTable, newViewName) => {
     let _expr = expression;
@@ -33,16 +35,30 @@ function App() {
 
   const loadConfig = () => {
     $.ajax({
-      url: "/config.json", success: (config) => {
+      url: '/config.json',
+      success: (config) => {
+        const configMapLayers = [];
+        if (config.vectorLayer) {
+          configMapLayers.push(config.vectorLayer);
+        }
+
+        if (config.wmsLayer) {
+          configMapLayers.push(config.wmsLayer);
+        }
+
         console.log('loaded config', config);
         setKUser(config.kUser);
         setKPass(config.kPass);
         setKUrl(config.kUrl);
-        setMapLayers([config.wmsLayer]);
+        setMapLayers(configMapLayers);
+        setSelectedTable(configMapLayers[0].id);
         setErrorMsg(null);
-      }, error: (xhr, textStatus, errorThrown) => {
+      },
+      error: (xhr, textStatus, errorThrown) => {
         console.log('Error loading config', errorThrown);
-        setErrorMsg("Config.json load error: " + errorThrown.toString());
+        setErrorMsg(
+          'Config.json load error: ' + errorThrown.toString()
+        );
       }
     });
   };
@@ -54,12 +70,12 @@ function App() {
     }
   }, []);
 
-  // Initialize GPUdb object 
+  // Initialize GPUdb object
   useEffect(() => {
     const options = {
       timeout: 60000,
       username: kUser,
-      password: kPass,
+      password: kPass
     };
     if (kUser == null || kPass == null) {
       console.log('No user available skipping');
@@ -73,10 +89,14 @@ function App() {
   const applyFilter = () => {
     if (mapLayers && mapLayers.length > 0) {
       const whereField = document.getElementById('where-field');
-      const origTableName = mapLayers[0].kineticaSettings.baseTable;
+      const origTableName = mapLayers.filter((lyr) => lyr.id == selectedTable)[0].kineticaSettings.baseTable;
       const newView = origTableName + '_temp';
-
-      const expression = createLayerFiltersStmt(whereField.value, origTableName, newView);
+      const expression = createLayerFiltersStmt(
+        whereField.value,
+        origTableName,
+        newView
+      );
+      const thisSelectTable = selectedTable;
 
       gpudb.execute_sql(expression, 0, 1, null, null, {}, (err, data) => {
         console.log(err, data);
@@ -84,7 +104,7 @@ function App() {
           setErrorMsg(err.message);
         } else {
           const newMapLayers = mapLayers.map((lyr, index) => {
-            if (index === 0) {
+            if (lyr.id === thisSelectTable) {
               return {
                 ...lyr,
                 kineticaSettings: {
@@ -93,6 +113,7 @@ function App() {
                 }
               };
             }
+            return lyr;
           });
 
           setMapLayers(newMapLayers);
@@ -107,34 +128,75 @@ function App() {
     }
   };
 
+  const handleTableSelected = (e) => {
+    setSelectedTable(e.target.value);
+  };
+
   console.log(kUrl, kUser, kPass, mapLayers);
+  const filterLayerOptions = mapLayers.map((lyr) => <option value={lyr.id}>{lyr.label}</option>);
 
   return (
     <div className="App">
-      {kUser && mapLayers && mapLayers.length > 0 ? <Map kUser={kUser} kPass={kPass} kUrl={kUrl} mapLayers={mapLayers} setError={setWmsErrorMsg} /> : null}
-      <div className='filter-box'>
+      {kUser && mapLayers && mapLayers.length > 0 ? (
+        <Map
+          kUser={kUser}
+          kPass={kPass}
+          kUrl={kUrl}
+          mapLayers={mapLayers}
+          setError={setWmsErrorMsg}
+        />
+      ) : null}
+      <div className="filter-box">
         <div className="form-group row">
-          <label className="col-sm-1 col-form-label">Where Clause:</label>
-          <div className="col-sm-10">
-            <input onKeyDown={onKeyDownHandler} type="text" className="form-control" id="where-field" placeholder="Enter Where clause" />
+          <label className="col-sm-1 col-form-label">
+            Where Clause:
+          </label>
+          <div className="col-sm-8">
+            <input
+              onKeyDown={onKeyDownHandler}
+              type="text"
+              className="form-control"
+              id="where-field"
+              placeholder="Enter Where clause"
+            />
+          </div>
+          <div className="col-sm-2">
+            <select
+              name="tableSelectedField"
+              className="form-control"
+              id="table-select-field"
+              value={selectedTable}
+              onChange={handleTableSelected}
+            >
+              {filterLayerOptions}
+            </select>
           </div>
           <div className="col-sm-1 ">
-            <button type="button" className="btn btn-primary" onClick={applyFilter}>Apply</button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={applyFilter}
+            >
+              Apply
+            </button>
           </div>
         </div>
       </div>
-      {(errorMsg != null || wmsErrorMsg != null) &&
-
-        <div className='error-box'>
-
+      {(errorMsg != null || wmsErrorMsg != null) && (
+        <div className="error-box">
           <div className="card" style={{ width: '18rem;' }}>
             <div className="card-body">
               <h5 className="card-title">Error:</h5>
-              {errorMsg != null && <p className="card-text">{errorMsg}</p>}
-              {wmsErrorMsg != null && <p className="card-text">{wmsErrorMsg}</p>}
+              {errorMsg != null && (
+                <p className="card-text">{errorMsg}</p>
+              )}
+              {wmsErrorMsg != null && (
+                <p className="card-text">{wmsErrorMsg}</p>
+              )}
             </div>
           </div>
-        </div>}
+        </div>
+      )}
     </div>
   );
 }

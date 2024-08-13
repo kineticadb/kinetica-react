@@ -22,5 +22,24 @@
         "opacity": 80,
         "minZoom": 0,
         "maxZoom": 24
+    },
+    "vectorLayer": {
+        "label": "US States",
+        "id": "us_states_id",
+        "kineticaSettings": {
+            "vectorLayerType": "vectorLayerType",
+            "view": "ki_home.us_states",
+            "baseTable": "ki_home.us_states",
+            "attributes": ["WKT", "NAME", "STUSPS"]
+        },
+        "style": {
+            "stroke-width": 0.6,
+            "stroke-color": "#E69A8D",
+            "fill-color": "#5F4B8B"
+        },
+        "visible": true,
+        "opacity": 90,
+        "minZoom": 0,
+        "maxZoom": 24
     }
 }

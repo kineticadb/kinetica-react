@@ -4,6 +4,7 @@ import OlView from 'ol/View';
 import OlLayerTile from 'ol/layer/Tile';
 import OlSourceOSM from 'ol/source/OSM';
 import { KWmsOlLayer } from './KWmsOlLayer';
+import { KVectorOlLayer } from './KVectorOlLayer';
 
 function Map(props) {
 
@@ -46,7 +47,7 @@ function Map(props) {
 
     const layersRender = (map && mapRendered && kUrl &&
         kUser && kPass && mapLayers ?
-        mapLayers.map((lyr, index) => <KWmsOlLayer
+        mapLayers.map((lyr, index) => lyr.kineticaSettings.renderType != null ? <KWmsOlLayer
             key={lyr.id}
             index={index}
             label={lyr.label}
@@ -63,6 +64,29 @@ function Map(props) {
             setError={(componentName, msg) => {
                 if (setError && msg) {
                     setError("WMS Error: " + msg);
+                } else {
+                    setError(null);
+                }
+            }}
+            datasource={null}
+        /> : <KVectorOlLayer
+            key={lyr.id}
+            index={index}
+            label={lyr.label}
+            id={lyr.id}
+            map={map}
+            kineticaSettings={lyr.kineticaSettings}
+            visible={lyr.visible}
+            opacity={lyr.opacity}
+            minZoom={lyr.minZoom}
+            maxZoom={lyr.maxZoom}
+            style={lyr.style}
+            vtsApiUrl={kUrl + '/vts'}
+            authUsername={kUser}
+            authPassword={kPass}
+            setError={(componentName, msg) => {
+                if (setError && msg) {
+                    setError("Vector Layer Error: " + msg);
                 } else {
                     setError(null);
                 }
