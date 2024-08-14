@@ -37,6 +37,6 @@
         "visible": true,
         "opacity": 90,
         "minZoom": 0,
-        "maxZoom": 24
+        "maxZoom": 18
     }
 }
