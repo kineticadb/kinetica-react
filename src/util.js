@@ -1,4 +1,9 @@
 // import moment from "moment";
+import * as d3 from "d3";
+
+export const d3Format = (format, value) => {
+    return d3.format(format)(value);
+};
 
 export const base64ArrayBuffer = arrayBuffer => {
     let base64 = '';
@@ -41,35 +46,4 @@ export const base64ArrayBuffer = arrayBuffer => {
         base64 += encodings[a] + encodings[b] + encodings[c] + '=';
     }
     return base64;
-};
-
-export const handleFilters = updates => {
-    return updates
-        .filter(update => {
-            return update.appliedValues
-                ? update.appliedValues.length > 0 ||
-                (update.appliedValues.length === 0 && !update.isAllSelected)
-                : false;
-        })
-        .map(update => {
-            return update.isExcludeMode
-                ? {
-                    column: update.fieldName,
-                    exclude:
-                        update.appliedValues.length > 0
-                            ? update.appliedValues.map(item => {
-                                return item.value;
-                            })
-                            : [],
-                }
-                : {
-                    column: update.fieldName,
-                    include:
-                        update.appliedValues.length > 0
-                            ? update.appliedValues.map(item => {
-                                return item.value;
-                            })
-                            : [],
-                };
-        });
 };

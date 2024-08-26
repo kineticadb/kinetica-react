@@ -137,11 +137,12 @@ function App() {
 
   return (
     <div className="App">
-      {kUser && mapLayers && mapLayers.length > 0 ? (
+      {gpudb && kUser && mapLayers && mapLayers.length > 0 ? (
         <Map
           kUser={kUser}
           kPass={kPass}
           kUrl={kUrl}
+          gpudb={gpudb}
           mapLayers={mapLayers}
           setError={setWmsErrorMsg}
         />

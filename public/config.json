@@ -13,8 +13,11 @@
             "colormap": "magma",
             "wkt": "",
             "longitude": "pickup_longitude",
-            "latitude": "pickup_latitude"
+            "latitude": "pickup_latitude",
+            "columns": ["pickup_longitude", "pickup_latitude"]
         },
+        "popupTemplate": "<div style=\"font-size:22px;margin-top: 35px;\"><label style=\"font-weight:bold\">Pickup Location:</label> {{pickup_longitude}},{{pickup_latitude}}<br/><label style=\"font-weight:bold\">Number of passengers:</label> {{passenger_count}}</div>",
+        "enablePopup": true,
         "visible": true,
         "opacity": 80,
         "minZoom": 0,
@@ -25,15 +28,17 @@
         "id": "us_states_id",
         "kineticaSettings": {
             "vectorLayerType": "vectorLayerType",
-            "view": "ki_home.us_states",
+            "view": "ki_home.us_states_buff",
             "baseTable": "ki_home.us_states",
-            "attributes": ["WKT", "NAME", "STUSPS"]
+            "attributes": ["WKT", "NAME", "GEOID"]
         },
         "style": {
             "stroke-width": 0.6,
             "stroke-color": "#E69A8D",
             "fill-color": "#5F4B8B"
         },
+        "popupTemplate": "<div style=\"font-size:22px;margin-top: 35px;\"><label style=\"font-weight:bold\">Name:</label> {{NAME}},<br/><label style=\"font-weight:bold\">GEOID:</label> {{GEOID}}</div>",
+        "enablePopup": true,
         "visible": true,
         "opacity": 90,
         "minZoom": 0,
