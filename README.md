@@ -1,13 +1,22 @@
 # Getting Started with this code
 
-This is an example project to show developers how use Kinetica WMS with React and Openlayers. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
+This is an example project to show developers how to use Kinetica WMS, vector tiles, and get records with React and Openlayers. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
 
-## Before running the application you will need to configure it. All configurations are done in public/config.json.  
+## Before running the application you will need to configure it and load some demo data. All configurations are done in public/config.json.  
 
 1. Set kUrl to the kinetica url i.e. http(s)://localhost:9191
 2. Set kUser and kPass to a Kinetica user's username and password
-3. Import the nyctaxi demo data in GAdmin. Navigate to Cluster(top panel) -> Demo(left side panel) -> Load More Data(green button under taxi). Alternatively you could change the WMS styling options in kineticaSettings to an existing table in your Kinetica instance.
-4. Import the ./data/ki_home.us_states.csv into Kinetica with workbench.  Click on the Files tab on the left -> Click the '+' under the Files tab and select "Upload New File".  Select a folder and upload the ./data/ki_home.us_states.csv.  After the file imports click the "Import" button. Click the Next button twice reach the "Destination" step.  Fill in the schema as ki_home and leave the table name us_states. Click the purple Import button.
+3. Import the nyctaxi demo data in GAdmin
+   1. Navigate to GAdmin from your browser
+   2. Click Cluster(top panel) 
+   3. Click Demo(left side panel) 
+   4. Click Load Sample Data(green button under NYC Taxi)
+4. Import the ./data/ki_home.us_states.csv into Kinetica with workbench      
+   1. Navigate to Kinetica workbench from your browser
+   2. Click on the Files tab on the left -> Click the '+' under the Files tab and select "Upload New File"
+   3. Select a folder and upload the ./data/ki_home.us_states.csv.  After the file imports click the "Import" button
+   4. Click the Next button twice reach the "Destination" step.  Fill in the schema as ki_home and leave the table name us_states
+   5. Click the purple Import button.
 
 ## Available Scripts
 
