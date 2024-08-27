@@ -394,3 +394,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.info_grid_no_records {
+  font-weight: bold;
+  font-size: x-large;
+  text-align: center;
+  margin-top: 5%;
+  margin-bottom: 5%;
+}
