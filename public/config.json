@@ -13,10 +13,9 @@
             "colormap": "magma",
             "wkt": "",
             "longitude": "pickup_longitude",
-            "latitude": "pickup_latitude",
-            "columns": ["pickup_longitude", "pickup_latitude"]
+            "latitude": "pickup_latitude"
         },
-        "popupTemplate": "<div style=\"font-size:22px;margin-top: 35px;\"><label style=\"font-weight:bold\">Pickup Location:</label> {{pickup_longitude}},{{pickup_latitude}}<br/><label style=\"font-weight:bold\">Number of passengers:</label> {{passenger_count}}</div>",
+        "popupTemplate": "<div style=\"font-size:22px;margin-top: 35px;\"><label style=\"font-weight:bold\">Pickup Location:</label> {{pickup_longitude}},{{pickup_latitude}}<br/><label style=\"font-weight:bold\">Number of passengers:</label> {{passenger_count}}<br/><label style=\"font-weight:bold\">Vendor:</label> {{vendor_id}}<br/><label style=\"font-weight:bold\">Fare Amount:</label> {{fare_amount}}<br/><label style=\"font-weight:bold\">Payment Type:</label> {{payment_type}}<br/><label style=\"font-weight:bold\">Distance:</label> {{trip_distance}}</div>",
         "enablePopup": true,
         "visible": true,
         "opacity": 80,
