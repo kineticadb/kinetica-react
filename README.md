@@ -1,8 +1,34 @@
-# Getting Started with this code
+# Kinetica React/JavaScript Map Examples
 
-This is an example project to show developers how to use Kinetica WMS, vector tiles, and get records with React and Openlayers. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
+This is an example project to show developers how to use Kinetica WMS, vector tiles, filters, and get/records with React and Openlayers. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
 
-## Before running the application you will need to configure it and load some demo data. All configurations are done in public/config.json.  
+## Examples
+
+### Kinetica Wep Map Service(WMS) Example
+[KWmsOlLayer.js](src/map/KWmsOlLayer.js) is a react component used to render Kinetica's WMS layers on an Openlayers map.  The code uses the `ol/source/ImageWMS` object to make Kinetica WMS requests with basic authentication headers.  The requestParams property contains all the necessary parameters for the WMS request.  More details about the necessary Kinetica WMS parameters can be found here: [Kinetica WMS Documentation](https://docs.kinetica.com/7.2/feature_overview/wms_feature_overview/)
+
+The WMS layer configuration can be found in [config.json](public/config.json) under property `wmsLayer.kineticaSettings`.  The `kineticaSettings` objects is converted to Kinetica WMS request parameters in KWmsOlLayer.js
+
+### Kinetica Vector Tiles Service(VTS) Example
+
+[KVectorOlLayer.js](src/map/KVectorOlLayer.js) is a react component used to render Kinetica vector layers on an Openlayers map.  The code uses `ol/source/VectorTile` and configures the tileLoadFunction to make requests to Kinetica with basic authentication headers.  The `attributes` request parameter specifies the WKT column and any additional attributes to be included with each tile request.  These attributes can then be used for a map's info popup.  More details about Kinetica vector tiles can be found here: [Kinetica VTS Documentation](https://docs.kinetica.com/7.2/api/rest/vts_rest/)
+
+The VTS layer configuration can be found in [config.json](public/config.json) under property `vectorLayer.kineticaSettings`.   The `kineticaSettings` object is converted to Kinetica VTS request parameters in KVectorOlLayers.js.
+
+
+### Kinetica Filter Example
+
+The `applyFilter` function in [App.js](src/App.js) performs a filter on a Kinetica table and creates a view for the WMS or VTS layers to render on the map.
+
+### Display Kinetica Column Data Example
+
+When a user clicks on the map, a map click event fires sending a REST call to Kinetica for the WMS table data using the `filterTableByRadius` function in [InfoPopupHelper.js](src/map/InfoPopupHelper.js).  
+
+The vector tile layer already contains the table column data in the tiles and can be retrieved from the map using `map.forEachFeatureAtPixel` in [Map.js](src/map/Map.js)
+
+## Initial Setup
+
+Before running the application you will need to configure it and load the necessary tables into Kinetica. All configurations are done in [config.json](public/config.json).  
 
 1. Set kUrl to the kinetica url i.e. http(s)://localhost:9191
 2. Set kUser and kPass to a Kinetica user's username and password
@@ -11,81 +37,35 @@ This is an example project to show developers how to use Kinetica WMS, vector ti
    2. Click Cluster(top panel) 
    3. Click Demo(left side panel) 
    4. Click Load Sample Data(green button under NYC Taxi)
-4. Import the ./data/ki_home.us_states.csv into Kinetica with workbench      
+4. Import [ki_home.us_states.csv](data/ki_home.us_states.csv) into Kinetica with workbench      
    1. Navigate to Kinetica workbench from your browser
-   2. Click on the Files tab on the left -> Click the '+' under the Files tab and select "Upload New File"
-   3. Select a folder and upload the ./data/ki_home.us_states.csv.  After the file imports click the "Import" button
-   4. Click the Next button twice reach the "Destination" step.  Fill in the schema as ki_home and leave the table name us_states
-   5. Click the purple Import button.
+   2. Click on the Files tab on the left
+   3. Click the `+` under the Files tab and select "Upload New File"
+   4. Select a folder and upload the [ki_home.us_states.csv](data/ki_home.us_states.csv).  
+   5. After the file uploads to workbench, click the "Import" button
+   6. Click the Next button twice to reach the "Destination" step.  
+   7. Fill in the schema as ki_home and leave the table name as us_states
+   8. Click the purple Import button.
 
-## Available Scripts
+## Running Application
 
 In the project directory, you can run:
+
+### `npm install`
+
+Installs all the necessary node dependencies
 
 ### `npm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Additional Scripts
+[Create React Scripts](CREATE_REACT_APP.md)
 
-### `npm test`
+## Notes
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-### Note due to an issue in openlayers, this code will not work with openlayers 8.  Instead this project uses Openlayers 7
+Note due to an issue in openlayers, this code will not work with openlayers 8.  Instead this project uses Openlayers 7.  See [ImageWMS imageLoadFunction asynchronous loading is broken](https://github.com/openlayers/openlayers/issues/15093)
 
 <!-- Need openlayers 7 until this fix is released for 8, https://github.com/openlayers/openlayers/issues/15093, https://github.com/openlayers/openlayers/issues/15109 -->
-npm install ol@7.5.2
+`npm install ol@7.5.2`
