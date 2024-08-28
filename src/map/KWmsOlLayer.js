@@ -104,7 +104,6 @@ export const KWmsOlLayer = (props) => {
             fillColor,
             borderColor,
             heatmapAttr,
-            cbStyleOptions,
             wkt,
             longitude,
             latitude
@@ -122,7 +121,7 @@ export const KWmsOlLayer = (props) => {
             TRACKMARKERCOLORS: fillColor,
             SHAPELINECOLORS: borderColor,
             TRACKLINECOLORS: borderColor,
-            TRACKMARKERSIZES: pointSize < 5 ? Math.min(3, pointSize) : pointSize - 2,
+            TRACKMARKERSIZES: pointSize == null ? undefined : pointSize < 5 ? Math.min(3, pointSize) : pointSize - 2,
         };
 
         console.log('requestParams: ', requestParams);
