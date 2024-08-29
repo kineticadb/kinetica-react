@@ -22,7 +22,7 @@ The `applyFilter` function in [App.js](src/App.js) performs a filter on a Kineti
 
 ### Display Kinetica Column Data Example
 
-When a user clicks on the map, a map click event fires sending a REST call to Kinetica for the WMS table data using the `filterTableByRadius` function in [InfoPopupHelper.js](src/map/InfoPopupHelper.js).  
+When a user clicks on the map, a map click event fires sending a REST call to Kinetica for the WMS table data using the `filterTableByRadius` function in [infoPopupHelper.js](src/map/infoPopupHelper.js).  
 
 The vector tile layer already contains the table column data in the tiles and can be retrieved from the map using `map.forEachFeatureAtPixel` in [Map.js](src/map/Map.js)
 
