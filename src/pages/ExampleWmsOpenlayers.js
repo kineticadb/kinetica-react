@@ -17,10 +17,18 @@ import { transform } from "ol/proj";
 
 
 const ExampleWmsOpenlayers = (props) => {
-    const { wmsLayer, gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
+    const { gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const wmsApiUrl = `${kUrl}/wms`;
     const mapId = 'map-container-id';
+    const tableSettings = {
+        STYLES: 'heatmap',
+        LAYERS: 'demo.nyctaxi',
+        COLORMAP: 'magma',
+        BLUR_RADIUS: 5,
+        X_ATTR: 'pickup_longitude',
+        Y_ATTR: 'pickup_latitude',
+    };
 
     const [popupContent, setPopupContent] = useState(null);
     const [width, setWidth] = useState(window.innerWidth);
@@ -77,32 +85,14 @@ const ExampleWmsOpenlayers = (props) => {
     }, []);
 
     useEffect(() => {
-        if (mapRendered && kUrl && wmsLayer && gpudb) {
+        if (mapRendered && kUrl && gpudb) {
             if (olLayer) {
                 map.getLayers().remove(olLayer);
             }
 
-            const {
-                renderType,
-                view,
-                baseTable,
-                colormap,
-                blurRadius,
-                pointSize,
-                fillColor,
-                longitude,
-                latitude
-            } = wmsLayer?.kineticaSettings;
             let requestParams = {
                 ...WMS_PARAMS,
-                STYLES: renderType,
-                LAYERS: view || baseTable,
-                COLORMAP: colormap,
-                POINTCOLORS: fillColor,
-                BLUR_RADIUS: blurRadius,
-                POINTSIZES: pointSize,
-                X_ATTR: longitude,
-                Y_ATTR: latitude,
+                ...tableSettings,
             };
 
             const opacity = .9;
@@ -192,7 +182,7 @@ const ExampleWmsOpenlayers = (props) => {
             setSingleClickEvt(clickHandler);
         }
 
-    }, [wmsLayer, kUrl, mapRendered, gpudb]);
+    }, [kUrl, mapRendered, gpudb]);
 
     useEffect(() => {
         map.setTarget(mapId);
