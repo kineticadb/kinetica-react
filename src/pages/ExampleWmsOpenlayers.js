@@ -26,6 +26,7 @@ const ExampleWmsOpenlayers = (props) => {
     const [width, setWidth] = useState(window.innerWidth);
     const [mapRendered, setMapRendered] = useState(null);
     const [olLayer, setOlLayer] = useState(null);
+    const [singleClickEvt, setSingleClickEvt] = useState(null);
     const [map] = useState(
         new OlMap({
             zoomControl: false,
@@ -149,7 +150,11 @@ const ExampleWmsOpenlayers = (props) => {
             map.getLayers().push(newOlLayer);
             setOlLayer(newOlLayer);
 
-            map.on('singleclick', function (evt) {
+            if (singleClickEvt) {
+                map.un('singleclick');
+            }
+
+            const clickHandler = map.on('singleclick', function (evt) {
                 const extent = evt.map.getView().calculateExtent(evt.map.getSize());
 
                 const coords = transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
@@ -161,11 +166,11 @@ const ExampleWmsOpenlayers = (props) => {
                 const clickRad = mapWidth * (5 / width);
 
                 gpudb.get_records(
-                    view || baseTable,
+                    tableSettings.LAYERS,
                     0,
                     1,
                     {
-                        expression: `GEODIST(${lon}, ${lat}, pickup_longitude, pickup_latitude) <= ${clickRad}`
+                        expression: `GEODIST(${lon}, ${lat}, ${tableSettings.X_ATTR}, ${tableSettings.Y_ATTR}) <= ${clickRad}`
                     },
                     (err, data) => {
                         if (data?.data.length > 0) {
@@ -184,6 +189,7 @@ const ExampleWmsOpenlayers = (props) => {
                     }
                 );
             });
+            setSingleClickEvt(clickHandler);
         }
 
     }, [wmsLayer, kUrl, mapRendered, gpudb]);
