@@ -75,7 +75,6 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
         _ => {
             if (selectedLayer) {
                 if (selectedLayer.vectorLayerType) {
-                    console.log('setting records', selectedLayer);
                     setRecords(selectedLayer.records);
                 } else {
                     let table = selectedLayer.qualified_view_name;

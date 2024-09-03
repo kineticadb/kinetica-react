@@ -18,8 +18,6 @@ export const KVectorOlLayer = (props) => {
     const componentName = label ? `KVectorOlLayer-${label}` : 'KVectorOlLayer';
 
     useEffect(() => {
-        console.log('KVectorOlLayer changes', kineticaSettings?.attributes, style, map, kineticaSettings, visible, opacity, minZoom, maxZoom, authUsername, authPassword)
-
         // Check if kineticaSettings is valid
         if (!kineticaSettings) {
             return;
@@ -84,11 +82,9 @@ export const KVectorOlLayer = (props) => {
                 olLayer.setOpacity(opacity / 100);
             }
             if (olLayer.getMaxZoom() != (maxZoom)) {
-                console.log('setting maxZoom', maxZoom);
                 olLayer.setMaxZoom(maxZoom);
             }
             if (olLayer.getMinZoom() != (minZoom)) {
-                console.log('setting minZoom', minZoom);
                 olLayer.setMinZoom(minZoom);
             }
             if (olLayer.getVisible() != visible) {
@@ -130,7 +126,6 @@ export const KVectorOlLayer = (props) => {
 
             newOlLayer.id = id;
 
-            console.log('KVectorOlLayer useEffect: insertAt:', index + 1, label);
             map.getLayers().insertAt(index + 1, newOlLayer);
             setOlLayer(newOlLayer);
         }

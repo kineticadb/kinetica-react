@@ -54,7 +54,6 @@ function Map(props) {
         setWidth(window.innerWidth);
     };
 
-    // Initilize
     useEffect(() => {
         map.setTarget(mapId);
         setMapRendered(true);
@@ -240,7 +239,7 @@ function Map(props) {
     );
 
     return (
-        <div>
+        <div style={{ width: "100%", height: "900px" }}>
             <Info
                 id="info"
                 gpudb={gpudb}

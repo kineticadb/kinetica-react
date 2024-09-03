@@ -1,5 +1,6 @@
 // import moment from "moment";
 import * as d3 from "d3";
+import * as $ from 'jquery';
 
 export const d3Format = (format, value) => {
     return d3.format(format)(value);
@@ -46,4 +47,66 @@ export const base64ArrayBuffer = arrayBuffer => {
         base64 += encodings[a] + encodings[b] + encodings[c] + '=';
     }
     return base64;
+};
+
+export const genImageLoadFunction = (authUsername, authPassword, setError, componentName) => {
+    return (image, src) => {
+        setError(componentName, '');
+        const xhttp = new XMLHttpRequest();
+        xhttp.open('GET', src, true);
+        if (authUsername && authPassword) {
+            xhttp.setRequestHeader(
+                'Authorization',
+                'Basic ' + btoa(`${authUsername}:${authPassword}`));
+        }
+        xhttp.responseType = 'arraybuffer';
+        xhttp.onreadystatechange = () => {
+            if (xhttp.readyState === 4) {
+                const arr = new Uint8Array(xhttp.response);
+                const data = 'data:image/png;base64,' + base64ArrayBuffer(arr);
+                image.getImage().src = data;
+            }
+        };
+        xhttp.send();
+    };
+};
+
+export const genImageLoadErrorFunction = (wmsApiUrl, authUsername, authPassword, requestParams, setError, componentName) => {
+    return event => {
+        const errorParams = {
+            ...requestParams,
+            HEIGHT: 100,
+            WIDTH: 100,
+            BBOX: '-10000,-10000,10000,10000',
+        };
+
+        // Make the same WMS request again to get the error message
+        $.ajax({
+            url: wmsApiUrl,
+            type: 'GET',
+            data: errorParams,
+            headers: {
+                'Authorization': 'Basic ' + btoa(`${authUsername}:${authPassword}`),
+            },
+            success: data => {
+                // If error from endpoint, will be XML format
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data, 'text/xml');
+                const node = xmlDoc.querySelectorAll('ServiceException');
+                [].map.call(node, exception => {
+                    setError(componentName, exception.textContent);
+                    console.error(`imageloaderror (${componentName})`, exception.textContent);
+                });
+            },
+            error: error => {
+                // If error from map service, error is in response text
+                if (error.responseText) {
+                    setError(componentName, error.responseText);
+                    console.error(`imageloaderror (${componentName})`, error.responseText);
+                } else {
+                    setError(componentName, `WMS request error to ${wmsApiUrl}`);
+                }
+            },
+        });
+    }
 };

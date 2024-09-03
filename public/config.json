@@ -27,7 +27,7 @@
         "id": "us_states_id",
         "kineticaSettings": {
             "vectorLayerType": "vectorLayerType",
-            "view": "ki_home.us_states_buff",
+            "view": "ki_home.us_states",
             "baseTable": "ki_home.us_states",
             "attributes": ["WKT", "NAME", "GEOID"]
         },

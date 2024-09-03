@@ -86,7 +86,6 @@ export const KWmsOlLayer = (props) => {
     const componentName = label ? `KWmsOlLayer-${label}` : 'KWmsOlLayer';
 
     useEffect(() => {
-        console.log('KWmsOlLayer changes', kineticaSettings?.view, map, kineticaSettings, visible, opacity, minZoom, maxZoom, wmsApiUrl, authUsername, authPassword)
 
         // Check if kineticaSettings is valid
         if (!kineticaSettings) {
@@ -124,8 +123,6 @@ export const KWmsOlLayer = (props) => {
             TRACKMARKERSIZES: pointSize == null ? undefined : pointSize < 5 ? Math.min(3, pointSize) : pointSize - 2,
         };
 
-        console.log('requestParams: ', requestParams);
-        console.log('heatmapAttr: ', heatmapAttr);
         if (renderType === 'heatmap' && heatmapAttr != null) {
             requestParams = {
                 ...requestParams,
@@ -168,9 +165,6 @@ export const KWmsOlLayer = (props) => {
         } else if (olLayer) {
             // Update
             if (prevProps.kineticaSettings != kineticaSettings) {
-                console.log(`${componentName} useEffect: update: WMS params:`, requestParams);
-
-                // get GEO_ATTR
                 const geoAttr = requestParams.GEO_ATTR;
                 if (requestParams.GEO_ATTR && requestParams.GEO_ATTR.length > 0) {
                     delete requestParams.X_ATTR;
@@ -193,11 +187,9 @@ export const KWmsOlLayer = (props) => {
                 olLayer.setOpacity(opacity / 100);
             }
             if (olLayer.getMaxZoom() != (maxZoom)) {
-                console.log('setting maxZoom', maxZoom);
                 olLayer.setMaxZoom(maxZoom);
             }
             if (olLayer.getMinZoom() != (minZoom)) {
-                console.log('setting minZoom', minZoom);
                 olLayer.setMinZoom(minZoom);
             }
             if (olLayer.getVisible() != visible) {
