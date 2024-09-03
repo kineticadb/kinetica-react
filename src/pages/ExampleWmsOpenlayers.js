@@ -211,7 +211,7 @@ const ExampleWmsOpenlayers = (props) => {
         <div id={mapId} className="map-container"></div>
         <div id="info" class="ol-popup">
             <a href="#" id="popup-closer" class="ol-popup-closer" onClick={closePopup}></a>
-            <div id="popup-content">{popupContent}</div>
+            <div id="popup-content" style={{ maxHeight: "200px", overflow: "auto" }}>{popupContent}</div>
         </div>
     </div>;
 };
