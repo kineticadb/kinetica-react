@@ -21,7 +21,6 @@ import {
 const ExampleWmsSpatialFilterOpenlayers = (props) => {
     const { wmsLayer, gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
-    const wmsApiUrl = `${kUrl}/wms`;
     const mapId = 'map-container-id';
 
     // Rectangle in New York
@@ -98,7 +97,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             const maxZoom = 24
             const id = 'kineticaLayer-id1';
 
-
+            const wmsApiUrl = `${kUrl}/wms`;
             const wmsSource = new OlImageWMS({
                 url: wmsApiUrl,
                 ratio: 1,
