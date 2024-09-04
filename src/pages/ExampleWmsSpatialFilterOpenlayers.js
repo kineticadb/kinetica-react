@@ -142,20 +142,18 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
 
     useEffect(() => {
         if (mapRendered && gpudb && kUrl && wmsLayer) {
-            const {
-                renderType,
-                baseTable,
-                colormap,
-                blurRadius,
-                pointSize,
-                fillColor,
-                longitude,
-                latitude
-            } = wmsLayer?.kineticaSettings;
+            const layerSettings = {
+                STYLES: 'heatmap',
+                LAYERS: 'demo.nyctaxi',
+                COLORMAP: 'magma',
+                BLUR_RADIUS: 5,
+                X_ATTR: 'pickup_longitude',
+                Y_ATTR: 'pickup_latitude',
+            };
 
             const randomNumber = Math.floor(Math.random() * 1000000000) + 1;
-            const newViewName = `${baseTable}_view_${randomNumber}`;
-            const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${baseTable} WHERE (STXY_INTERSECTS(${longitude},${latitude},GEOMETRY('${wktgeom}')) = 1) using table properties (ttl=20)`;
+            const newViewName = `${layerSettings.LAYERS}_view_${randomNumber}`;
+            const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE (STXY_INTERSECTS(${layerSettings.X_ATTR},${layerSettings.Y_ATTR},GEOMETRY('${wktgeom}')) = 1) using table properties (ttl=20)`;
             gpudb.execute_sql(
                 createViewStmt,
                 0,
@@ -167,17 +165,15 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                     if (data) {
                         setRequestParams({
                             ...WMS_PARAMS,
-                            STYLES: renderType,
+                            STYLES: layerSettings.STYLES,
                             LAYERS: newViewName,
-                            COLORMAP: colormap,
-                            POINTCOLORS: fillColor,
-                            BLUR_RADIUS: blurRadius,
-                            POINTSIZES: pointSize,
-                            X_ATTR: longitude,
-                            Y_ATTR: latitude,
+                            COLORMAP: layerSettings.COLORMAP,
+                            BLUR_RADIUS: layerSettings.BLUR_RADIUS,
+                            X_ATTR: layerSettings.X_ATTR,
+                            Y_ATTR: layerSettings.Y_ATTR,
                         });
                     } else {
-                        console.error('Error creating view', baseTable);
+                        console.error('Error creating view', layerSettings.LAYERS);
                     }
                 }
             );
