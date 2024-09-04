@@ -20,7 +20,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
     const { gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const mapId = 'map-container-id';
-    const tableSettings = {
+    const layerSettings = {
         STYLES: "cb_raster",
         LAYERS: "demo.nyctaxi",
         X_ATTR: "pickup_longitude",
@@ -101,7 +101,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
             // Kinetica WMS parameters
             let requestParams = {
                 ...WMS_PARAMS,
-                ...tableSettings,
+                ...layerSettings,
             };
 
             const wmsApiUrl = `${kUrl}/wms`;
@@ -156,11 +156,11 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
                 const clickRad = mapWidth * (5 / width);
 
                 gpudb.get_records(
-                    tableSettings.LAYERS,
+                    layerSettings.LAYERS,
                     0,
                     1,
                     {
-                        expression: `GEODIST(${lon}, ${lat}, ${tableSettings.X_ATTR}, ${tableSettings.Y_ATTR}) <= ${clickRad}`
+                        expression: `GEODIST(${lon}, ${lat}, ${layerSettings.X_ATTR}, ${layerSettings.Y_ATTR}) <= ${clickRad}`
                     },
                     (err, data) => {
                         if (data?.data.length > 0) {

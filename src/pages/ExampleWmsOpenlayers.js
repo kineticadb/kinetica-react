@@ -21,7 +21,7 @@ const ExampleWmsOpenlayers = (props) => {
 
     const wmsApiUrl = `${kUrl}/wms`;
     const mapId = 'map-container-id';
-    const tableSettings = {
+    const layerSettings = {
         STYLES: 'heatmap',
         LAYERS: 'demo.nyctaxi',
         COLORMAP: 'magma',
@@ -91,7 +91,7 @@ const ExampleWmsOpenlayers = (props) => {
 
             let requestParams = {
                 ...WMS_PARAMS,
-                ...tableSettings,
+                ...layerSettings,
             };
 
             const opacity = .9;
@@ -151,11 +151,11 @@ const ExampleWmsOpenlayers = (props) => {
                 const clickRad = mapWidth * (5 / width);
 
                 gpudb.get_records(
-                    tableSettings.LAYERS,
+                    layerSettings.LAYERS,
                     0,
                     1,
                     {
-                        expression: `GEODIST(${lon}, ${lat}, ${tableSettings.X_ATTR}, ${tableSettings.Y_ATTR}) <= ${clickRad}`
+                        expression: `GEODIST(${lon}, ${lat}, ${layerSettings.X_ATTR}, ${layerSettings.Y_ATTR}) <= ${clickRad}`
                     },
                     (err, data) => {
                         if (data?.data.length > 0) {
