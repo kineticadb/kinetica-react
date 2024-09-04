@@ -10,13 +10,13 @@
    
    [ExampleWmsClassbreakOpenlayers.js](src/pages/ExampleWmsClassbreakOpenlayers.js) - Display Kinetica Classbreak WMS layer on an OpenLayers map.
 
-   ## VTS example
-   
-   [ExampleVtsOpenlayers.js](src/pages/ExampleVtsOpenlayers.js) - Display Kinetica VTS layer on an OpenLayers map.
-
    ## Spatial filter and WMS example
 
    [ExampleWmsSpatialFilterOpenlayers.js](src/pages/ExampleWmsSpatialFilterOpenlayers.js) - Apply a spatial filter to a Kinetica table and render the resulting view using Kinetica WMS on an OpenLayers map
+
+   ## VTS example
+   
+   [ExampleVtsOpenlayers.js](src/pages/ExampleVtsOpenlayers.js) - Display Kinetica VTS layer on an OpenLayers map.
 
    ## Simple map application example
    
