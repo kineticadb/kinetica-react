@@ -5,6 +5,7 @@ import OlLayerTile from 'ol/layer/Tile';
 import OlSourceOSM from 'ol/source/OSM';
 import OlImage from 'ol/layer/Image';
 import OlImageWMS from 'ol/source/ImageWMS';
+import OlOverlay from 'ol/Overlay';
 import {
     base64ArrayBuffer,
     genImageLoadErrorFunction,
@@ -12,12 +13,27 @@ import {
 import {
     WMS_PARAMS,
 } from '../constants';
+import { transform } from "ol/proj";
+
 
 const ExampleWmsClassbreakOpenlayers = (props) => {
-    const { kUser: authUsername, kPass: authPassword, kUrl } = props;
+    const { gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const mapId = 'map-container-id';
+    const tableSettings = {
+        STYLES: "cb_raster",
+        LAYERS: "demo.nyctaxi",
+        X_ATTR: "pickup_longitude",
+        Y_ATTR: "pickup_latitude",
+        CB_ATTR: "tip_amount",
+        CB_VALS: "0.000:4.012,4.012:8.024,8.024:12.036,12.036:16.048,16.048:20.100",
+        POINTCOLORS: "ffdc8665,ff138086,ff534666,ffcd7672,ffeeb462",
+        POINTSHAPES: "square,square,circle,circle,diamond",
+        POINTSIZES: "4,10,8,16,4",
+    };
 
+    const [popupContent, setPopupContent] = useState(null);
+    const [width, setWidth] = useState(window.innerWidth);
     const [mapRendered, setMapRendered] = useState(false);
     const [olLayer, setOlLayer] = useState(null);
     const [map] = useState(
@@ -44,9 +60,25 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
         })
     );
 
+    window.onresize = _ => {
+        setWidth(window.innerWidth);
+    };
+
     useEffect(() => {
         map.setTarget(mapId);
         setMapRendered(true);
+        map.addOverlay(
+            new OlOverlay({
+                id: 'info',
+                element: document.getElementById('info'),
+                autoPan: true,
+                autoPanAnimation: {
+                    duration: 250,
+                },
+                positioning: 'center-center',
+                autoPanMargin: 70,
+            })
+        );
         return () => {
             map.setTarget(undefined);
             setMapRendered(false);
@@ -54,7 +86,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
     }, []);
 
     useEffect(() => {
-        if (mapRendered && kUrl) {
+        if (mapRendered && kUrl && gpudb) {
 
             if (olLayer) {
                 map.getLayers().remove(olLayer);
@@ -69,15 +101,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
             // Kinetica WMS parameters
             let requestParams = {
                 ...WMS_PARAMS,
-                STYLES: "cb_raster",
-                LAYERS: "demo.nyctaxi",
-                X_ATTR: "pickup_longitude",
-                Y_ATTR: "pickup_latitude",
-                CB_ATTR: "tip_amount",
-                CB_VALS: "0.000:4.012,4.012:8.024,8.024:12.036,12.036:16.048,16.048:20.100",
-                POINTCOLORS: "ffdc8665,ff138086,ff534666,ffcd7672,ffeeb462",
-                POINTSHAPES: "square,square,circle,circle,diamond",
-                POINTSIZES: "4,10,8,16,4",
+                ...tableSettings,
             };
 
             const wmsApiUrl = `${kUrl}/wms`;
@@ -119,14 +143,55 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
 
             map.getLayers().push(newOlLayer);
             setOlLayer(newOlLayer);
+
+            const mapClickHandler = (evt) => {
+                const extent = evt.map.getView().calculateExtent(evt.map.getSize());
+
+                const coords = transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+                const lon = coords[0];
+                const lat = coords[1];
+
+                // Determine a radius around the user click event for the spatial filter
+                const mapWidth = extent[2] - extent[0];
+                const clickRad = mapWidth * (5 / width);
+
+                gpudb.get_records(
+                    tableSettings.LAYERS,
+                    0,
+                    1,
+                    {
+                        expression: `GEODIST(${lon}, ${lat}, ${tableSettings.X_ATTR}, ${tableSettings.Y_ATTR}) <= ${clickRad}`
+                    },
+                    (err, data) => {
+                        if (data?.data.length > 0) {
+                            const results = Object.keys(data.data[0]).map((key) => {
+                                return (<tr><td style={{ "font-weight": "bold" }}>{key}</td><td>{data.data[0][key]}</td></tr>)
+                            });
+                            const tableDiv = (<table>{results}</table>)
+                            setPopupContent((<div>{tableDiv}</div>));
+                            map.getOverlayById('info').setPosition(evt.coordinate);
+
+                        } else {
+                            setPopupContent('');
+                            map.getOverlayById('info').setPosition(undefined);
+
+                        }
+                    }
+                );
+            };
+            map.un('singleclick', mapClickHandler);
+            map.on('singleclick', mapClickHandler);
         }
 
-    }, [kUrl, mapRendered]);
+    }, [kUrl, mapRendered, gpudb]);
 
+    const closePopup = () => {
+        setPopupContent('');
+        map.getOverlayById('info').setPosition(undefined);
+    };
 
     useEffect(() => {
         map.setTarget(mapId);
-
         return () => {
             map.setTarget(undefined);
         };
@@ -134,6 +199,10 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
 
     return <div style={{ width: "100%", height: "100%" }}>
         <div id={mapId} className="map-container"></div>
+        <div id="info" class="ol-popup">
+            <a href="#" id="popup-closer" class="ol-popup-closer" onClick={closePopup}></a>
+            <div id="popup-content" style={{ maxHeight: "200px", overflow: "auto" }}>{popupContent}</div>
+        </div>
     </div>;
 };
 
