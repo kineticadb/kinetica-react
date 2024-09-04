@@ -40,7 +40,7 @@ const Info = props => {
         <div
             id={id}
             style={{
-                height: '523px',
+                height: '323px',
                 width: `${width / 1.2 - 0}px`,
                 padding: '10px',
                 borderRadius: '5px',

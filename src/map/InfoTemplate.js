@@ -86,12 +86,12 @@ const InfoTemplate = (props) => {
     }}>Loading....</div> : null;
 
     return (
-        <div style={{ "height": "523px" }}>
+        <div style={{ "height": "323px" }}>
             {!isLoading && selectedLayer && (<div class="card ">
                 <div class="card-header">
                     <h4 class="my-0 font-weight-normal">{selectedLayer?.label}</h4>
                 </div>
-                <div class="card-body" style={{ "height": "383px" }}>
+                <div class="card-body" style={{ "height": "283px", overflow: "scroll" }}>
                     <div class="text-center">
                         <div class="row">
                             <div class="col" style={{ "textAlign": "left" }}>

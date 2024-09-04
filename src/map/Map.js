@@ -65,7 +65,7 @@ function Map(props) {
                 autoPanAnimation: {
                     duration: 250,
                 },
-                positioning: "center-center",
+                positioning: "bottom-center",
                 autoPanMargin: 70,
             })
         );
