@@ -10,8 +10,8 @@ const Layout = () => {
     const locationMapping = {
         '/exampleWms': 'WMS with info popup',
         '/exampleWmsClassbreak': 'Classbreak WMS',
-        '/exampleVts': 'Vector Tiles',
         '/exampleWmsSpatialFilter': 'Spatial Filter on Table',
+        '/exampleVts': 'Vector Tiles',
         '/exampleApp': 'Example App',
     };
     const title = locationMapping[pathname] || 'Select Example';
