@@ -34,7 +34,6 @@ const ExampleWmsOpenlayers = (props) => {
     const [width, setWidth] = useState(window.innerWidth);
     const [mapRendered, setMapRendered] = useState(null);
     const [olLayer, setOlLayer] = useState(null);
-    const [singleClickEvt, setSingleClickEvt] = useState(null);
     const [map] = useState(
         new OlMap({
             zoomControl: false,
@@ -140,11 +139,7 @@ const ExampleWmsOpenlayers = (props) => {
             map.getLayers().push(newOlLayer);
             setOlLayer(newOlLayer);
 
-            if (singleClickEvt) {
-                map.un('singleclick');
-            }
-
-            const clickHandler = map.on('singleclick', function (evt) {
+            const mapClickHandler = (evt) => {
                 const extent = evt.map.getView().calculateExtent(evt.map.getSize());
 
                 const coords = transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
@@ -178,8 +173,9 @@ const ExampleWmsOpenlayers = (props) => {
                         }
                     }
                 );
-            });
-            setSingleClickEvt(clickHandler);
+            };
+            map.un('singleclick', mapClickHandler);
+            map.on('singleclick', mapClickHandler);
         }
 
     }, [kUrl, mapRendered, gpudb]);
