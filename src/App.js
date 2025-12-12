@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GPUdb } from './lib/GPUdb';
 import * as $ from 'jquery';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -7,6 +7,8 @@ import Layout from "./pages/Layout";
 import ExampleApp from './pages/ExampleApp';
 import ExampleWmsOpenlayers from './pages/ExampleWmsOpenlayers';
 import ExampleWmsClassbreakOpenlayers from './pages/ExampleWmsClassbreakOpenlayers';
+import ExampleWmsHighlightOpenlayers from './pages/ExampleWmsHighlightOpenlayers';
+import ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers from './pages/ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers';
 import ExampleVtsOpenlayers from './pages/ExampleVtsOpenlayers';
 import ExampleWmsSpatialFilterOpenlayers from './pages/ExampleWmsSpatialFilterOpenlayers';
 
@@ -71,6 +73,8 @@ function App() {
           <Route path="exampleApp" element={<ExampleApp wmsLayer={wmsLayer} vectorLayer={vectorLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
           <Route path="exampleWms" element={<ExampleWmsOpenlayers wmsLayer={wmsLayer} vectorLayer={vectorLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
           <Route path="exampleWmsClassbreak" element={<ExampleWmsClassbreakOpenlayers wmsLayer={wmsLayer} vectorLayer={vectorLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
+          <Route path="exampleWmsHighlight" element={<ExampleWmsHighlightOpenlayers wmsLayer={wmsLayer} vectorLayer={vectorLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
+          <Route path="exampleWmsMutlipleLayersAtDiffZooms" element={<ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers wmsLayer={wmsLayer} vectorLayer={vectorLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
           <Route path="exampleVts" element={<ExampleVtsOpenlayers gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
           <Route path="exampleWmsSpatialFilter" element={<ExampleWmsSpatialFilterOpenlayers wmsLayer={wmsLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />
           <Route path="*" element={<ExampleApp wmsLayer={wmsLayer} vectorLayer={vectorLayer} gpudb={gpudb} kUser={kUser} kPass={kPass} kUrl={kUrl} />} />

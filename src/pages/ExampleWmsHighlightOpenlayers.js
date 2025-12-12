@@ -1,0 +1,254 @@
+import { useEffect, useState } from 'react';
+import OlMap from 'ol/Map';
+import OlView from 'ol/View';
+import OlLayerTile from 'ol/layer/Tile';
+import OlSourceOSM from 'ol/source/OSM';
+import OlImage from 'ol/layer/Image';
+import OlImageWMS from 'ol/source/ImageWMS';
+import WKT from 'ol/format/WKT.js';
+import { Fill, Stroke, Style } from 'ol/style.js';
+
+import {
+    base64ArrayBuffer,
+    genImageLoadErrorFunction,
+} from '../util';
+import {
+    WMS_PARAMS,
+} from '../constants';
+
+const ExampleWmsSpatialFilterOpenlayers = (props) => {
+    const { wmsLayer, gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
+
+    const mapId = 'map-container-id';
+
+    // // Rectangle in New York
+    const wktgeom = 'POLYGON((-73.98460744139155 40.76405292603977,-73.98775793276715 40.75994370103416,-73.97872550054117 40.75602760679567,-73.9761382826348 40.76032095972252,-73.98460744139155 40.76405292603977))';
+    const format = new WKT();
+    const feature = format.readFeature(wktgeom, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857',
+    });
+    const styles = [
+        new Style({
+            stroke: new Stroke({
+                color: 'green',
+                width: 6,
+            }),
+            fill: new Fill({
+                color: 'rgba(0, 0, 255, 0.1)',
+            }),
+        }),
+    ];
+
+    const [mapRendered, setMapRendered] = useState(null);
+    const [requestParams, setRequestParams] = useState(null);
+    const [olLayer, setOlLayer] = useState(null);
+    const [selectedRequestParams, setSelectedRequestParams] = useState(null);
+    const [olSelectedLayer, setOlSelectedLayer] = useState(null);
+    const [map] = useState(
+        new OlMap({
+            zoomControl: false,
+            pixelRatio: 1,
+            target: undefined,
+            layers: [
+                new OlLayerTile({
+                    name: 'OSM',
+                    source: new OlSourceOSM({
+                        crossOrigin: 'anonymous',
+                        wrapX: true,
+                        noWrap: false,
+                    }),
+                    className: 'ol_bw',
+                }),
+            ],
+            overlays: [],
+            view: new OlView({
+                center: [-8230506.935506294, 4977530.086160267],
+                zoom: 12,
+            }),
+        })
+    );
+
+    useEffect(() => {
+        map.setTarget(mapId);
+        setMapRendered(true);
+        return () => {
+            map.setTarget(undefined);
+            setMapRendered(false);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (selectedRequestParams) {
+            if (olSelectedLayer) {
+                map.getLayers().remove(olSelectedLayer);
+            }
+
+            const opacity = .9;
+            const minZoom = 0;
+            const maxZoom = 24
+            const id = 'kineticaLayer-id1-highlight';
+
+            const wmsApiUrl = `${kUrl}/wms`;
+            const wmsSource = new OlImageWMS({
+                url: wmsApiUrl,
+                ratio: 1,
+                params: selectedRequestParams,
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous',
+                imageLoadFunction: (image, src) => {
+                    const xhttp = new XMLHttpRequest();
+                    xhttp.open('GET', src, true);
+                    if (authUsername && authPassword) {
+                        xhttp.setRequestHeader(
+                            'Authorization',
+                            'Basic ' + btoa(`${authUsername}:${authPassword}`));
+                    }
+                    xhttp.responseType = 'arraybuffer';
+                    xhttp.onreadystatechange = () => {
+                        if (xhttp.readyState === 4) {
+                            const arr = new Uint8Array(xhttp.response);
+                            const data = 'data:image/png;base64,' + base64ArrayBuffer(arr);
+                            image.getImage().src = data;
+                        }
+                    };
+                    xhttp.send();
+                },
+            });
+            wmsSource.on('imageloaderror', genImageLoadErrorFunction(wmsApiUrl, authUsername, authPassword, selectedRequestParams, (msg) => { console.log(msg) }, 'WMSOpenlayersExample'));
+
+            const newOlLayer = new OlImage({
+                source: wmsSource,
+                opacity: opacity,
+                minZoom: minZoom,
+                maxZoom: maxZoom,
+            });
+
+            newOlLayer.id = id;
+
+            map.getLayers().push(newOlLayer);
+            setOlSelectedLayer(newOlLayer);
+        }
+
+    }, [selectedRequestParams]);
+
+    useEffect(() => {
+        if (mapRendered && gpudb && kUrl && wmsLayer) {
+            const layerSettings = {
+                STYLES: 'heatmap',
+                LAYERS: 'demo.nyctaxi',
+                COLORMAP: 'magma',
+                BLUR_RADIUS: 5,
+                X_ATTR: 'pickup_longitude',
+                Y_ATTR: 'pickup_latitude',
+            };
+
+            if (olLayer) {
+                map.getLayers().remove(olLayer);
+            }
+
+            let requestParams = {
+                ...WMS_PARAMS,
+                STYLES: 'raster',
+                LAYERS: layerSettings.LAYERS,
+                POINTCOLORS: '6C0BA9',
+                POINTSIZES: '6',
+                POINTSHAPES: 'circle',
+                X_ATTR: layerSettings.X_ATTR,
+                Y_ATTR: layerSettings.Y_ATTR,
+            };
+
+            const opacity = .9;
+            const minZoom = 0;
+            const maxZoom = 24;
+            const id = 'kineticaLayer-id1';
+            const wmsApiUrl = `${kUrl}/wms`;
+
+            const wmsSource = new OlImageWMS({
+                url: wmsApiUrl,
+                ratio: 1,
+                params: requestParams,
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous',
+                imageLoadFunction: (image, src) => {
+                    const xhttp = new XMLHttpRequest();
+                    xhttp.open('GET', src, true);
+                    if (authUsername && authPassword) {
+                        xhttp.setRequestHeader(
+                            'Authorization',
+                            'Basic ' + btoa(`${authUsername}:${authPassword}`));
+                    }
+                    xhttp.responseType = 'arraybuffer';
+                    xhttp.onreadystatechange = () => {
+                        if (xhttp.readyState === 4) {
+                            const arr = new Uint8Array(xhttp.response);
+                            const data = 'data:image/png;base64,' + base64ArrayBuffer(arr);
+                            image.getImage().src = data;
+                        }
+                    };
+                    xhttp.send();
+                },
+            });
+            wmsSource.on('imageloaderror', genImageLoadErrorFunction(wmsApiUrl, authUsername, authPassword, requestParams, (msg) => { console.log(msg) }, 'WMSOpenlayersExample'));
+
+            const newOlLayer = new OlImage({
+                source: wmsSource,
+                opacity: opacity,
+                minZoom: minZoom,
+                maxZoom: maxZoom,
+            });
+
+            newOlLayer.id = id;
+            newOlLayer.setVisible(true);
+
+            map.getLayers().push(newOlLayer);
+            setOlLayer(newOlLayer);
+
+            const randomNumber = Math.floor(Math.random() * 1000000000) + 1;
+            // Creating a temp view name which will timeout after the ttl setting
+            const newViewName = `${layerSettings.LAYERS}_view_sel_${randomNumber}`;
+            const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE (STXY_INTERSECTS(${layerSettings.X_ATTR},${layerSettings.Y_ATTR},GEOMETRY('${wktgeom}')) = 1) using table properties (ttl=20)`;
+            // See other example filters below:
+            // const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE passenger_count > 5 using table properties (ttl=20)`;
+            // const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE payment_type = 'Cash' using table properties (ttl=20)`;
+            gpudb.execute_sql(
+                createViewStmt,
+                0,
+                1,
+                null,
+                [],
+                {},
+                (err, data) => {
+                    if (data) {
+                        setSelectedRequestParams({
+                            ...WMS_PARAMS,
+                            STYLES: 'raster',
+                            LAYERS: newViewName,
+                            POINTCOLORS: 'ffde64',
+                            POINTSIZES: '6',
+                            POINTSHAPES: 'circle',
+                            X_ATTR: layerSettings.X_ATTR,
+                            Y_ATTR: layerSettings.Y_ATTR,
+                        });
+                    } else {
+                        console.error('Error creating view', layerSettings.LAYERS);
+                    }
+                }
+            );
+        }
+
+    }, [wmsLayer, gpudb, kUrl, mapRendered]);
+
+    useEffect(() => {
+        map.setTarget(mapId);
+        return () => {
+            map.setTarget(undefined);
+        };
+    }, []);
+
+    return <div style={{ width: "100%", height: "100%" }}>
+        <div id={mapId} className="map-container"></div>
+    </div>;
+};
+
+export default ExampleWmsSpatialFilterOpenlayers;

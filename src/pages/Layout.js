@@ -10,6 +10,8 @@ const Layout = () => {
     const locationMapping = {
         '/exampleWms': 'WMS with info popup',
         '/exampleWmsClassbreak': 'Classbreak WMS',
+        '/exampleWmsHighlight': 'Highlight with 2 WMS layers',
+        '/exampleWmsMutlipleLayersAtDiffZooms': 'Zoom Level layers',
         '/exampleWmsSpatialFilter': 'Spatial Filter on Table',
         '/exampleVts': 'Vector Tiles',
         '/exampleApp': 'Example App',
