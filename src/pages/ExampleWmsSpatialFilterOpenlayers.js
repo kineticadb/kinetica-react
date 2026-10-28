@@ -173,7 +173,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                             Y_ATTR: layerSettings.Y_ATTR,
                         });
                     } else {
-                        console.error('Error creating view', layerSettings.LAYERS);
+                        console.error('Error creating view', newViewName, err.message);
                     }
                 }
             );

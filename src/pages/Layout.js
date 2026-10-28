@@ -19,7 +19,7 @@ const Layout = () => {
     const title = locationMapping[pathname] || 'Select Example';
 
     const dropItems = Object.keys(locationMapping).map(locationKey => {
-        return (<Dropdown.Item href={locationKey}>{locationMapping[locationKey]}</Dropdown.Item>);
+        return (<Dropdown.Item key={locationKey} href={locationKey}>{locationMapping[locationKey]}</Dropdown.Item>);
     });
 
     return (

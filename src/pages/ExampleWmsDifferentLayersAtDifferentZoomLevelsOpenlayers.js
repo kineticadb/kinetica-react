@@ -246,7 +246,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 SHAPELINECOLORS: 'ffb43457,ffe35933,fff99a13,fffadb58',
                 SHAPELINEWIDTHS: '2,2,2,2',
             };
-            const showResultsH3_8 = gpudb.show_table(newBoundaryLayerName + 'ff', {'no_error_if_not_exists': 'true'});
+            const showResultsH3_8 = gpudb.show_table(newBoundaryLayerName, {'no_error_if_not_exists': 'true'});
             console.log(showResultsH3_8);
             // If the h3_8 table does not exist, create it
             if (showResultsH3_8.table_names.length < 1) {
@@ -275,7 +275,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                         if (data) {
                             setH3_8RequestParams(newH3_8RequestParams);
                         } else {
-                            console.error('Error creating view', layerSettings.LAYERS);
+                            console.error('Error creating table', newBoundaryLayerName, err.message);
                         }
                     }
                 );
@@ -325,7 +325,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                         if (data) {
                             setH3_6RequestParams(newH3_6RequestParams);
                         } else {
-                            console.error('Error creating view', layerSettings.LAYERS);
+                            console.error('Error creating table', newBoundaryLayerName2, err.message);
                         }
                     }
                 );

@@ -163,6 +163,9 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
                         expression: `GEODIST(${lon}, ${lat}, ${layerSettings.X_ATTR}, ${layerSettings.Y_ATTR}) <= ${clickRad}`
                     },
                     (err, data) => {
+                        if (err) {
+                            console.error('Error getting records', layerSettings.LAYERS, err.message);
+                        }
                         if (data?.data.length > 0) {
                             const results = Object.keys(data.data[0]).map((key) => {
                                 return (<tr><td style={{ "font-weight": "bold" }}>{key}</td><td>{data.data[0][key]}</td></tr>)
