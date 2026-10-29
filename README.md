@@ -10,6 +10,14 @@
    
    [ExampleWmsClassbreakOpenlayers.js](src/pages/ExampleWmsClassbreakOpenlayers.js) - Display Kinetica Classbreak WMS layer on an OpenLayers map.
 
+   ## Highlight with 2 WMS layers example
+
+   [ExampleWmsHighlightOpenlayers.js](src/pages/ExampleWmsHighlightOpenlayers.js) - Render a Kinetica table as a WMS layer, then highlight the records inside a polygon by drawing a second WMS layer from a temporary view filtered with `STXY_INTERSECTS`.
+
+   ## Different layers at different zoom levels example
+
+   [ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers.js](src/pages/ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers.js) - Switch between Kinetica WMS layers as the map zooms: H3 resolution 6 cells below zoom 12, H3 resolution 8 cells from zoom 12 to 15, and a heatmap from zoom 15. The H3 boundary tables (`demo.nyctaxi_h3_6_boundary`, `demo.nyctaxi_h3_8_boundary`) are created from `demo.nyctaxi` on first load if they do not already exist.
+
    ## Spatial filter and WMS example
 
    [ExampleWmsSpatialFilterOpenlayers.js](src/pages/ExampleWmsSpatialFilterOpenlayers.js) - Apply a spatial filter to a Kinetica table and render the resulting view using Kinetica WMS on an OpenLayers map

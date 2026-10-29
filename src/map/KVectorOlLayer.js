@@ -11,6 +11,38 @@ function usePrevious(value) {
     return ref.current;
 }
 
+const genTileLoadFunction = (authUsername, authPassword, setError, componentName) => {
+    return (tile, url) => {
+        tile.setLoader(function (extent, resolution, projection) {
+            fetch(url, {
+                headers: {
+                    'Authorization': 'Basic ' + btoa(authUsername + ':' + authPassword)
+                },
+            }).then(response => {
+                if (!response.ok) {
+                    // Error responses are text, not MVT; reading them as a tile throws
+                    return response.text().then(body => {
+                        throw new Error(`VTS request failed with HTTP ${response.status}: ${body.slice(0, 200)}`);
+                    });
+                }
+                return response.arrayBuffer();
+            }).then(data => {
+                const format = tile.getFormat();
+                const features = format.readFeatures(data, {
+                    extent: extent,
+                    featureProjection: projection
+                });
+                tile.setFeatures(features);
+            }).catch(error => {
+                // Mark the tile failed so OpenLayers stops waiting on it, and report the error
+                tile.onError();
+                setError(componentName, error.message);
+                console.error(`tileloaderror (${componentName})`, error.message);
+            });
+        });
+    };
+};
+
 export const KVectorOlLayer = (props) => {
     const { id, label, map, kineticaSettings, style, visible, opacity, minZoom, maxZoom, vtsApiUrl, authUsername, authPassword, setError, index } = props;
     const prevProps = usePrevious({ id, label, map, kineticaSettings, style, visible, opacity, minZoom, maxZoom, vtsApiUrl, authUsername, authPassword });
@@ -59,24 +91,7 @@ export const KVectorOlLayer = (props) => {
             ) {
                 // Note: Add a timestamp to the url to prevent hitting the cache
                 olLayer.getSource().setUrl(`${vtsApiUrl}/${view}/{z}/{x}/{y}?attributes=${attributes.toString()}&chView=${new Date().getTime()}`);
-                olLayer.getSource().setTileLoadFunction(async function (tile, url) {
-                    tile.setLoader(function (extent, resolution, projection) {
-                        fetch(url, {
-                            headers: {
-                                'Authorization': 'Basic ' + btoa(authUsername + ':' + authPassword)
-                            },
-                        }).then(function (response) {
-                            response.arrayBuffer().then(function (data) {
-                                const format = tile.getFormat()
-                                const features = format.readFeatures(data, {
-                                    extent: extent,
-                                    featureProjection: projection
-                                });
-                                tile.setFeatures(features);
-                            });
-                        });
-                    });
-                },);
+                olLayer.getSource().setTileLoadFunction(genTileLoadFunction(authUsername, authPassword, setError, componentName));
             }
             if (olLayer.getOpacity() != (opacity / 100)) {
                 olLayer.setOpacity(opacity / 100);
@@ -94,24 +109,7 @@ export const KVectorOlLayer = (props) => {
             const vectorSource = new OlVectorTile({
                 format: new MVT(),
                 url: `${vtsApiUrl}/${view}/{z}/{x}/{y}?attributes=` + attributes.toString(),
-                tileLoadFunction: async function (tile, url) {
-                    tile.setLoader(function (extent, resolution, projection) {
-                        fetch(url, {
-                            headers: {
-                                'Authorization': 'Basic ' + btoa(authUsername + ':' + authPassword)
-                            },
-                        }).then(function (response) {
-                            response.arrayBuffer().then(function (data) {
-                                const format = tile.getFormat()
-                                const features = format.readFeatures(data, {
-                                    extent: extent,
-                                    featureProjection: projection
-                                });
-                                tile.setFeatures(features);
-                            });
-                        });
-                    });
-                },
+                tileLoadFunction: genTileLoadFunction(authUsername, authPassword, setError, componentName),
             });
 
             const newOlLayer = new OlVectorTileLayer({

@@ -163,9 +163,9 @@ const ExampleWmsOpenlayers = (props) => {
                         }
                         if (data?.data.length > 0) {
                             const results = Object.keys(data.data[0]).map((key) => {
-                                return (<tr><td style={{ "font-weight": "bold" }}>{key}</td><td>{data.data[0][key]}</td></tr>)
+                                return (<tr key={key}><td style={{ fontWeight: "bold" }}>{key}</td><td>{data.data[0][key]}</td></tr>)
                             });
-                            const tableDiv = (<table>{results}</table>)
+                            const tableDiv = (<table><tbody>{results}</tbody></table>)
                             setPopupContent((<div>{tableDiv}</div>));
                             map.getOverlayById('info').setPosition(evt.coordinate);
 
@@ -198,8 +198,8 @@ const ExampleWmsOpenlayers = (props) => {
 
     return <div style={{ width: "100%", height: "100%" }}>
         <div id={mapId} className="map-container"></div>
-        <div id="info" class="ol-popup">
-            <a href="#" id="popup-closer" class="ol-popup-closer" onClick={closePopup}></a>
+        <div id="info" className="ol-popup">
+            <a href="#" id="popup-closer" className="ol-popup-closer" onClick={closePopup}></a>
             <div id="popup-content" style={{ maxHeight: "200px", overflow: "auto" }}>{popupContent}</div>
         </div>
     </div>;

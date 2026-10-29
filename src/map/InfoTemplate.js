@@ -87,14 +87,14 @@ const InfoTemplate = (props) => {
 
     return (
         <div style={{ "height": "323px" }}>
-            {!isLoading && selectedLayer && (<div class="card ">
-                <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">{selectedLayer?.label}</h4>
+            {!isLoading && selectedLayer && (<div className="card ">
+                <div className="card-header">
+                    <h4 className="my-0 font-weight-normal">{selectedLayer?.label}</h4>
                 </div>
-                <div class="card-body" style={{ "height": "283px", overflow: "scroll" }}>
-                    <div class="text-center">
-                        <div class="row">
-                            <div class="col" style={{ "textAlign": "left" }}>
+                <div className="card-body" style={{ "height": "283px", overflow: "scroll" }}>
+                    <div className="text-center">
+                        <div className="row">
+                            <div className="col" style={{ "textAlign": "left" }}>
                                 {selectedLayer && <DropdownButton
                                     id="select-info-layer"
                                     variant="dark"
@@ -105,7 +105,7 @@ const InfoTemplate = (props) => {
                                 </DropdownButton>}
                             </div>
 
-                            <div class="col" style={{ "textAlign": "right" }}>
+                            <div className="col" style={{ "textAlign": "right" }}>
 
                                 {coordinate && (
                                     <span style={{ float: 'right', marginRight: '16px' }}>
@@ -117,8 +117,8 @@ const InfoTemplate = (props) => {
                                 )}
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col" style={{ "textAlign": "left" }}>
+                        <div className="row">
+                            <div className="col" style={{ "textAlign": "left" }}>
                                 {records == null && <div className="info_grid info_grid_no_records">
                                     No Records
                                 </div>}
@@ -129,10 +129,10 @@ const InfoTemplate = (props) => {
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col" style={{ "textAlign": "left" }}>
+                <div className="row">
+                    <div className="col" style={{ "textAlign": "left" }}>
                     </div>
-                    <div class="col" style={{ "textAlign": "center" }}>
+                    <div className="col" style={{ "textAlign": "center" }}>
                         {records && <div>
                             <CaretLeftFill
                                 onClick={_ => {
@@ -147,11 +147,11 @@ const InfoTemplate = (props) => {
                             />
                         </div>}
                     </div>
-                    <div class="col" style={{ "textAlign": "right" }}>
+                    <div className="col" style={{ "textAlign": "right" }}>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <a href="#" class="btn btn-primary" onClick={_ => close()}>Close</a>
+                <div className="card-footer">
+                    <a href="#" className="btn btn-primary" onClick={_ => close()}>Close</a>
                 </div>
             </div>)}
             {loadingPanel}

@@ -96,7 +96,7 @@ function ExampleApp(props) {
         setSelectedTable(e.target.value);
     };
 
-    const filterLayerOptions = mapLayers.map((lyr) => <option value={lyr.id}>{lyr.label}</option>);
+    const filterLayerOptions = mapLayers.map((lyr) => <option key={lyr.id} value={lyr.id}>{lyr.label}</option>);
 
     return (
         <div style={{ width: "100%", height: "100%" }}>
@@ -129,7 +129,7 @@ function ExampleApp(props) {
                             name="tableSelectedField"
                             className="form-control"
                             id="table-select-field"
-                            value={selectedTable}
+                            value={selectedTable ?? ''}
                             onChange={handleTableSelected}
                         >
                             {filterLayerOptions}
@@ -148,7 +148,7 @@ function ExampleApp(props) {
             </div>
             {(errorMsg != null || wmsErrorMsg != null) && (
                 <div className="error-box">
-                    <div className="card" style={{ width: '18rem;' }}>
+                    <div className="card" style={{ width: '18rem' }}>
                         <div className="card-body">
                             <h5 className="card-title">Error:</h5>
                             {errorMsg != null && (

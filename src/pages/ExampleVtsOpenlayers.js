@@ -85,14 +85,24 @@ const ExampleVtsOpenlayers = (props) => {
                                 'Authorization': 'Basic ' + btoa(authUsername + ':' + authPassword)
                             },
                         }).then(function (response) {
-                            response.arrayBuffer().then(function (data) {
-                                const format = tile.getFormat();
-                                const features = format.readFeatures(data, {
-                                    extent: extent,
-                                    featureProjection: projection
+                            if (!response.ok) {
+                                // Error responses are text, not MVT; reading them as a tile throws
+                                return response.text().then(function (body) {
+                                    throw new Error(`VTS request failed with HTTP ${response.status}: ${body.slice(0, 200)}`);
                                 });
-                                tile.setFeatures(features);
+                            }
+                            return response.arrayBuffer();
+                        }).then(function (data) {
+                            const format = tile.getFormat();
+                            const features = format.readFeatures(data, {
+                                extent: extent,
+                                featureProjection: projection
                             });
+                            tile.setFeatures(features);
+                        }).catch(function (error) {
+                            // Mark the tile failed so OpenLayers stops waiting on it
+                            tile.onError();
+                            console.error('tileloaderror', error.message);
                         });
                     });
                 },
