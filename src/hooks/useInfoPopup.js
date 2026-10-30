@@ -55,14 +55,19 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
         } else if (newSelectedLayer.queriedData == null) {
             // Find data around the click first since the layer has not been queried yet
             setIsLoading(true);
-            let newLayer = await InfoPopupHelper.checkSingleMapLayerDataAtLocation(gpudb, newSelectedLayer, coordinate[0], coordinate[1], radius);
-            let newLocalLayers = localInfoLayers.map((lyr, lyrIndex) => lyrIndex === newSelectedLayerIndex ? newLayer : lyr);
-            setLocalInfoLayers(newLocalLayers);
-            setIsLoading(false);
-            setSelectedLayer(newLayer);
-            setPageNumber(1);
-            setDisplayedPageNumber(1);
-            setRecords(undefined);
+            try {
+                let newLayer = await InfoPopupHelper.checkSingleMapLayerDataAtLocation(gpudb, newSelectedLayer, coordinate[0], coordinate[1], radius);
+                let newLocalLayers = localInfoLayers.map((lyr, lyrIndex) => lyrIndex === newSelectedLayerIndex ? newLayer : lyr);
+                setLocalInfoLayers(newLocalLayers);
+                setSelectedLayer(newLayer);
+                setPageNumber(1);
+                setDisplayedPageNumber(1);
+                setRecords(undefined);
+            } catch (error) {
+                console.error('Error querying layer', newSelectedLayer.view, error.message);
+            } finally {
+                setIsLoading(false);
+            }
         } else {
             setSelectedLayer(newSelectedLayer);
             setPageNumber(1);
@@ -79,14 +84,18 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
                 } else {
                     let table = selectedLayer.qualified_view_name;
                     async function fetchData(table, columns) {
-                        const records = await gpudb.get_records(
-                            table,
-                            (pageNumber - 1) * INFO_MODAL_FETCH_LIMIT,
-                            INFO_MODAL_FETCH_LIMIT,
-                            {}
-                        );
-                        setRecords(records);
-
+                        try {
+                            const records = await gpudb.get_records(
+                                table,
+                                (pageNumber - 1) * INFO_MODAL_FETCH_LIMIT,
+                                INFO_MODAL_FETCH_LIMIT,
+                                {}
+                            );
+                            setRecords(records);
+                        } catch (error) {
+                            console.error('Error getting records', table, error.message);
+                            setRecords(undefined);
+                        }
                     }
 
                     if (gpudb && table) {

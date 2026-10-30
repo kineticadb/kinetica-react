@@ -54,7 +54,9 @@ function ExampleApp(props) {
         if (mapLayers && mapLayers.length > 0) {
             const whereField = document.getElementById('where-field');
             const origTableName = mapLayers.filter((lyr) => lyr.id == selectedTable)[0].kineticaSettings.baseTable;
-            const newView = origTableName + '_temp';
+            // Unique per filter so concurrent users don't replace each other's view; ttl=3 cleans it up
+            const randomNumber = Math.floor(Math.random() * 1000000000) + 1;
+            const newView = `${origTableName}_temp_${randomNumber}`;
             const expression = createLayerFiltersStmt(
                 whereField.value,
                 origTableName,

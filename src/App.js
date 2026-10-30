@@ -21,7 +21,7 @@ function App() {
   const [vectorLayer, setVectorLayer] = useState(null);
 
   const loadConfig = () => {
-    $.ajax({
+    return $.ajax({
       url: '/config.json',
       success: (config) => {
         setKUser(config.kUser);
@@ -37,16 +37,19 @@ function App() {
 
       },
       error: (xhr, textStatus, errorThrown) => {
-        console.log('Error loading config', errorThrown);
+        if (textStatus !== 'abort') {
+          console.log('Error loading config', errorThrown);
+        }
       }
     });
   };
 
   // Load Config
   useEffect(() => {
-    if (kUser === null) {
-      loadConfig();
-    }
+    const request = kUser === null ? loadConfig() : null;
+    // StrictMode mounts twice in development; abort the first request so the config (and the
+    // wmsLayer object every example depends on) is only applied once
+    return () => request?.abort();
   }, []);
 
   // Initialize GPUdb object

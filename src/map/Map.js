@@ -44,7 +44,6 @@ function Map(props) {
         })
     );
     const [mapRendered, setMapRendered] = useState(false);
-    const [handleMapClickKey, setHandleMapClickKey] = useState(null);
     const [infoCoordinate, setInfoCoordinate] = useState(undefined);
     const [infoLayers, setInfoLayers] = useState(undefined);
     const [infoRadius, setInfoRadius] = useState(undefined);
@@ -181,10 +180,8 @@ function Map(props) {
     );
     useEffect(() => {
         if (map) {
-            if (handleMapClickKey) {
-                unByKey(handleMapClickKey);
-            }
-            setHandleMapClickKey(map.on("singleclick", handleMapClick));
+            const key = map.on("singleclick", handleMapClick);
+            return () => unByKey(key);
         }
     }, [map, handleMapClick]);
 
