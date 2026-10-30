@@ -147,34 +147,39 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE (STXY_INTERSECTS(${layerSettings.X_ATTR},${layerSettings.Y_ATTR},GEOMETRY('${wktgeom}')) = 1) using table properties (ttl=20)`;
             // Ignore the view-creation result if this effect has been cleaned up by then
             let cancelled = false;
-            gpudb.execute_sql(
-                createViewStmt,
-                0,
-                1,
-                null,
-                [],
-                {},
-                (err, data) => {
-                    if (cancelled) {
-                        return;
+            // Sent after a tick: React StrictMode's dev-only mount/cleanup/remount then
+            // cancels the first run before it reaches the server, so the setup is sent once
+            const timer = setTimeout(() => {
+                gpudb.execute_sql(
+                    createViewStmt,
+                    0,
+                    1,
+                    null,
+                    [],
+                    {},
+                    (err, data) => {
+                        if (cancelled) {
+                            return;
+                        }
+                        if (data) {
+                            setRequestParams({
+                                ...WMS_PARAMS,
+                                STYLES: layerSettings.STYLES,
+                                LAYERS: newViewName,
+                                COLORMAP: layerSettings.COLORMAP,
+                                BLUR_RADIUS: layerSettings.BLUR_RADIUS,
+                                X_ATTR: layerSettings.X_ATTR,
+                                Y_ATTR: layerSettings.Y_ATTR,
+                            });
+                        } else {
+                            console.error('Error creating view', newViewName, err.message);
+                        }
                     }
-                    if (data) {
-                        setRequestParams({
-                            ...WMS_PARAMS,
-                            STYLES: layerSettings.STYLES,
-                            LAYERS: newViewName,
-                            COLORMAP: layerSettings.COLORMAP,
-                            BLUR_RADIUS: layerSettings.BLUR_RADIUS,
-                            X_ATTR: layerSettings.X_ATTR,
-                            Y_ATTR: layerSettings.Y_ATTR,
-                        });
-                    } else {
-                        console.error('Error creating view', newViewName, err.message);
-                    }
-                }
-            );
+                );
+            }, 0);
             return () => {
                 cancelled = true;
+                clearTimeout(timer);
             };
         }
     }, [wmsLayer, gpudb, kUrl]);

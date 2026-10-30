@@ -239,123 +239,128 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 SHAPELINECOLORS: 'ffb43457,ffe35933,fff99a13,fffadb58',
                 SHAPELINEWIDTHS: '2,2,2,2',
             };
-            gpudb.show_table(newBoundaryLayerName, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_8) => {
-                if (cancelled) {
-                    return;
-                }
-                if (err) {
-                    console.error('Error checking table', newBoundaryLayerName, err.message);
-                    return;
-                }
-                console.log(showResultsH3_8);
-                // If the h3_8 table does not exist, create it. Plain CREATE TABLE (not OR REPLACE) so a
-                // table another client created in the meantime is never replaced; Kinetica doesn't allow
-                // IF NOT EXISTS with CREATE TABLE ... AS.
-                if (showResultsH3_8.table_names.length < 1) {
-                    const createH3Cells1 = `CREATE TABLE ${newBoundaryLayerName} AS
-                        (
-                            SELECT
-                            h3_index,
-                            H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
-                            COUNT(*) AS total_pickups
-                            FROM (SELECT
-                                pickup_latitude,
-                                pickup_longitude,
-                                H3_XYTOCELL(pickup_longitude, pickup_latitude, 8) AS h3_index
-                                FROM demo.nyctaxi)
-                            GROUP BY h3_index
+            // Sent after a tick: React StrictMode's dev-only mount/cleanup/remount then
+            // cancels the first run before it reaches the server, so the setup is sent once
+            const timer = setTimeout(() => {
+                gpudb.show_table(newBoundaryLayerName, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_8) => {
+                    if (cancelled) {
+                        return;
+                    }
+                    if (err) {
+                        console.error('Error checking table', newBoundaryLayerName, err.message);
+                        return;
+                    }
+                    console.log(showResultsH3_8);
+                    // If the h3_8 table does not exist, create it. Plain CREATE TABLE (not OR REPLACE) so a
+                    // table another client created in the meantime is never replaced; Kinetica doesn't allow
+                    // IF NOT EXISTS with CREATE TABLE ... AS.
+                    if (showResultsH3_8.table_names.length < 1) {
+                        const createH3Cells1 = `CREATE TABLE ${newBoundaryLayerName} AS
+                            (
+                                SELECT
+                                h3_index,
+                                H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
+                                COUNT(*) AS total_pickups
+                                FROM (SELECT
+                                    pickup_latitude,
+                                    pickup_longitude,
+                                    H3_XYTOCELL(pickup_longitude, pickup_latitude, 8) AS h3_index
+                                    FROM demo.nyctaxi)
+                                GROUP BY h3_index
 
-                        )`;
-                    gpudb.execute_sql(
-                        createH3Cells1,
-                        0,
-                        1,
-                        null,
-                        [],
-                        {},
-                        (err, data) => {
-                            if (cancelled) {
-                                return;
+                            )`;
+                        gpudb.execute_sql(
+                            createH3Cells1,
+                            0,
+                            1,
+                            null,
+                            [],
+                            {},
+                            (err, data) => {
+                                if (cancelled) {
+                                    return;
+                                }
+                                // "already exists" means another client created it after our check; use it
+                                if (data || /already exists/i.test(err.message)) {
+                                    setH3_8RequestParams(newH3_8RequestParams);
+                                } else {
+                                    console.error('Error creating table', newBoundaryLayerName, err.message);
+                                }
                             }
-                            // "already exists" means another client created it after our check; use it
-                            if (data || /already exists/i.test(err.message)) {
-                                setH3_8RequestParams(newH3_8RequestParams);
-                            } else {
-                                console.error('Error creating table', newBoundaryLayerName, err.message);
-                            }
-                        }
-                    );
-                } else {
-                    setH3_8RequestParams(newH3_8RequestParams);
-                }
-            });
+                        );
+                    } else {
+                        setH3_8RequestParams(newH3_8RequestParams);
+                    }
+                });
 
-            const newBoundaryLayerName2 = 'demo.nyctaxi_h3_6_boundary';
-            const newH3_6RequestParams = {
-                ...WMS_PARAMS,
-                STYLES: 'cb_raster',
-                LAYERS: newBoundaryLayerName2,
-                GEO_ATTR: 'h3_cell',
-                ANTIALIASING: true,
-                CB_ATTR: 'total_pickups',
-                CB_VALS: '0:413.22,413.22:2582.15,2582.15:4751.07,4751.07:10006920.00',
-                SHAPEFILLCOLORS: '66b43457,66e35933,66f99a13,66fadb58',
-                SHAPELINECOLORS: 'ffb43457,ffe35933,fff99a13,fffadb58',
-                SHAPELINEWIDTHS: '2,2,2,2',
-            };
-            gpudb.show_table(newBoundaryLayerName2, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_6) => {
-                if (cancelled) {
-                    return;
-                }
-                if (err) {
-                    console.error('Error checking table', newBoundaryLayerName2, err.message);
-                    return;
-                }
-                console.log(showResultsH3_6);
-                // If the h3_6 table does not exist, create it. Plain CREATE TABLE (not OR REPLACE) so a
-                // table another client created in the meantime is never replaced; Kinetica doesn't allow
-                // IF NOT EXISTS with CREATE TABLE ... AS.
-                if (showResultsH3_6.table_names.length < 1) {
-                    const createH3Cells2 = `CREATE TABLE ${newBoundaryLayerName2} AS
-                        (
-                            SELECT
-                            h3_index,
-                            H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
-                            COUNT(*) AS total_pickups
-                            FROM (SELECT
-                                pickup_latitude,
-                                pickup_longitude,
-                                H3_XYTOCELL(pickup_longitude, pickup_latitude, 6) AS h3_index
-                                FROM demo.nyctaxi)
-                            GROUP BY h3_index
+                const newBoundaryLayerName2 = 'demo.nyctaxi_h3_6_boundary';
+                const newH3_6RequestParams = {
+                    ...WMS_PARAMS,
+                    STYLES: 'cb_raster',
+                    LAYERS: newBoundaryLayerName2,
+                    GEO_ATTR: 'h3_cell',
+                    ANTIALIASING: true,
+                    CB_ATTR: 'total_pickups',
+                    CB_VALS: '0:413.22,413.22:2582.15,2582.15:4751.07,4751.07:10006920.00',
+                    SHAPEFILLCOLORS: '66b43457,66e35933,66f99a13,66fadb58',
+                    SHAPELINECOLORS: 'ffb43457,ffe35933,fff99a13,fffadb58',
+                    SHAPELINEWIDTHS: '2,2,2,2',
+                };
+                gpudb.show_table(newBoundaryLayerName2, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_6) => {
+                    if (cancelled) {
+                        return;
+                    }
+                    if (err) {
+                        console.error('Error checking table', newBoundaryLayerName2, err.message);
+                        return;
+                    }
+                    console.log(showResultsH3_6);
+                    // If the h3_6 table does not exist, create it. Plain CREATE TABLE (not OR REPLACE) so a
+                    // table another client created in the meantime is never replaced; Kinetica doesn't allow
+                    // IF NOT EXISTS with CREATE TABLE ... AS.
+                    if (showResultsH3_6.table_names.length < 1) {
+                        const createH3Cells2 = `CREATE TABLE ${newBoundaryLayerName2} AS
+                            (
+                                SELECT
+                                h3_index,
+                                H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
+                                COUNT(*) AS total_pickups
+                                FROM (SELECT
+                                    pickup_latitude,
+                                    pickup_longitude,
+                                    H3_XYTOCELL(pickup_longitude, pickup_latitude, 6) AS h3_index
+                                    FROM demo.nyctaxi)
+                                GROUP BY h3_index
 
-                        )`;
-                    gpudb.execute_sql(
-                        createH3Cells2,
-                        0,
-                        1,
-                        null,
-                        [],
-                        {},
-                        (err, data) => {
-                            if (cancelled) {
-                                return;
+                            )`;
+                        gpudb.execute_sql(
+                            createH3Cells2,
+                            0,
+                            1,
+                            null,
+                            [],
+                            {},
+                            (err, data) => {
+                                if (cancelled) {
+                                    return;
+                                }
+                                // "already exists" means another client created it after our check; use it
+                                if (data || /already exists/i.test(err.message)) {
+                                    setH3_6RequestParams(newH3_6RequestParams);
+                                } else {
+                                    console.error('Error creating table', newBoundaryLayerName2, err.message);
+                                }
                             }
-                            // "already exists" means another client created it after our check; use it
-                            if (data || /already exists/i.test(err.message)) {
-                                setH3_6RequestParams(newH3_6RequestParams);
-                            } else {
-                                console.error('Error creating table', newBoundaryLayerName2, err.message);
-                            }
-                        }
-                    );
-                } else {
-                    setH3_6RequestParams(newH3_6RequestParams);
-                }
-            });
+                        );
+                    } else {
+                        setH3_6RequestParams(newH3_6RequestParams);
+                    }
+                });
+            }, 0);
 
             return () => {
                 cancelled = true;
+                clearTimeout(timer);
             };
         }
     }, [wmsLayer, gpudb, kUrl]);

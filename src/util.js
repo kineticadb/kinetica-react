@@ -1,9 +1,10 @@
-// import moment from "moment";
-import * as d3 from "d3";
+// d3-format only: importing all of d3 also bundles modules like d3-transition, which have side
+// effects and so can't be tree-shaken
+import { format as d3FormatSpecifier } from 'd3-format';
 import * as $ from 'jquery';
 
 export const d3Format = (format, value) => {
-    return d3.format(format)(value);
+    return d3FormatSpecifier(format)(value);
 };
 
 export const base64ArrayBuffer = arrayBuffer => {

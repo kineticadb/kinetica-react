@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import {
     Dropdown,
@@ -33,7 +34,10 @@ const Layout = () => {
                 </div>
             </div>
             <div style={{ width: "100%", height: "900px" }}>
-                <Outlet />
+                {/* Example pages are loaded on demand (see App.jsx) */}
+                <Suspense fallback={<div style={{ paddingLeft: "10px" }}>Loading example…</div>}>
+                    <Outlet />
+                </Suspense>
             </div>
         </>
     )

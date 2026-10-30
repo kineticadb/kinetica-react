@@ -207,35 +207,40 @@ const ExampleWmsHighlightOpenlayers = (props) => {
             // See other example filters below:
             // const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE passenger_count > 5 using table properties (ttl=20)`;
             // const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE payment_type = 'Cash' using table properties (ttl=20)`;
-            gpudb.execute_sql(
-                createViewStmt,
-                0,
-                1,
-                null,
-                [],
-                {},
-                (err, data) => {
-                    if (cancelled) {
-                        return;
+            // Sent after a tick: React StrictMode's dev-only mount/cleanup/remount then
+            // cancels the first run before it reaches the server, so the setup is sent once
+            const timer = setTimeout(() => {
+                gpudb.execute_sql(
+                    createViewStmt,
+                    0,
+                    1,
+                    null,
+                    [],
+                    {},
+                    (err, data) => {
+                        if (cancelled) {
+                            return;
+                        }
+                        if (data) {
+                            setSelectedRequestParams({
+                                ...WMS_PARAMS,
+                                STYLES: 'raster',
+                                LAYERS: newViewName,
+                                POINTCOLORS: 'ffde64',
+                                POINTSIZES: '6',
+                                POINTSHAPES: 'circle',
+                                X_ATTR: layerSettings.X_ATTR,
+                                Y_ATTR: layerSettings.Y_ATTR,
+                            });
+                        } else {
+                            console.error('Error creating view', newViewName, err.message);
+                        }
                     }
-                    if (data) {
-                        setSelectedRequestParams({
-                            ...WMS_PARAMS,
-                            STYLES: 'raster',
-                            LAYERS: newViewName,
-                            POINTCOLORS: 'ffde64',
-                            POINTSIZES: '6',
-                            POINTSHAPES: 'circle',
-                            X_ATTR: layerSettings.X_ATTR,
-                            Y_ATTR: layerSettings.Y_ATTR,
-                        });
-                    } else {
-                        console.error('Error creating view', newViewName, err.message);
-                    }
-                }
-            );
+                );
+            }, 0);
             return () => {
                 cancelled = true;
+                clearTimeout(timer);
                 map.getLayers().remove(newOlLayer);
             };
         }

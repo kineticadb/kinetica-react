@@ -1,16 +1,19 @@
 import './App.css';
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, useEffect, useMemo, useState } from 'react';
 import { GPUdb } from './lib/GPUdb';
 import * as $ from 'jquery';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
-import ExampleApp from './pages/ExampleApp';
-import ExampleWmsOpenlayers from './pages/ExampleWmsOpenlayers';
-import ExampleWmsClassbreakOpenlayers from './pages/ExampleWmsClassbreakOpenlayers';
-import ExampleWmsHighlightOpenlayers from './pages/ExampleWmsHighlightOpenlayers';
-import ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers from './pages/ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers';
-import ExampleVtsOpenlayers from './pages/ExampleVtsOpenlayers';
-import ExampleWmsSpatialFilterOpenlayers from './pages/ExampleWmsSpatialFilterOpenlayers';
+
+// Each example page, with the OpenLayers modules (and, for Example App, Handlebars) it uses, is
+// downloaded only when it's opened. Layout shows a fallback while a page loads.
+const ExampleApp = lazy(() => import('./pages/ExampleApp'));
+const ExampleWmsOpenlayers = lazy(() => import('./pages/ExampleWmsOpenlayers'));
+const ExampleWmsClassbreakOpenlayers = lazy(() => import('./pages/ExampleWmsClassbreakOpenlayers'));
+const ExampleWmsHighlightOpenlayers = lazy(() => import('./pages/ExampleWmsHighlightOpenlayers'));
+const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = lazy(() => import('./pages/ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers'));
+const ExampleVtsOpenlayers = lazy(() => import('./pages/ExampleVtsOpenlayers'));
+const ExampleWmsSpatialFilterOpenlayers = lazy(() => import('./pages/ExampleWmsSpatialFilterOpenlayers'));
 
 function App() {
   const [kUser, setKUser] = useState(null);
