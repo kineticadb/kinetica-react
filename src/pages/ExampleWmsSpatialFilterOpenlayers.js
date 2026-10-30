@@ -44,7 +44,6 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
 
     const [requestParams, setRequestParams] = useState(null);
     const [mapRendered, setMapRendered] = useState(null);
-    const [olLayer, setOlLayer] = useState(null);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -88,10 +87,6 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
 
     useEffect(() => {
         if (requestParams) {
-            if (olLayer) {
-                map.getLayers().remove(olLayer);
-            }
-
             const opacity = .9;
             const minZoom = 0;
             const maxZoom = 24
@@ -135,10 +130,9 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlLayer(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
         }
-
-    }, [requestParams]);
+    }, [map, requestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
         if (mapRendered && gpudb && kUrl && wmsLayer) {
@@ -154,6 +148,8 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             const randomNumber = Math.floor(Math.random() * 1000000000) + 1;
             const newViewName = `${layerSettings.LAYERS}_view_${randomNumber}`;
             const createViewStmt = `create temp materialized view ${newViewName} as SELECT * FROM ${layerSettings.LAYERS} WHERE (STXY_INTERSECTS(${layerSettings.X_ATTR},${layerSettings.Y_ATTR},GEOMETRY('${wktgeom}')) = 1) using table properties (ttl=20)`;
+            // Ignore the view-creation result if this effect has been cleaned up by then
+            let cancelled = false;
             gpudb.execute_sql(
                 createViewStmt,
                 0,
@@ -162,6 +158,9 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                 [],
                 {},
                 (err, data) => {
+                    if (cancelled) {
+                        return;
+                    }
                     if (data) {
                         setRequestParams({
                             ...WMS_PARAMS,
@@ -177,8 +176,10 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                     }
                 }
             );
+            return () => {
+                cancelled = true;
+            };
         }
-
     }, [wmsLayer, gpudb, kUrl, mapRendered]);
 
     useEffect(() => {

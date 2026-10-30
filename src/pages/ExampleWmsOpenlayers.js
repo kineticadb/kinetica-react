@@ -16,24 +16,24 @@ import {
 import { transform } from "ol/proj";
 
 
+const layerSettings = {
+    STYLES: 'heatmap',
+    LAYERS: 'demo.nyctaxi',
+    COLORMAP: 'magma',
+    BLUR_RADIUS: 5,
+    X_ATTR: 'pickup_longitude',
+    Y_ATTR: 'pickup_latitude',
+};
+
 const ExampleWmsOpenlayers = (props) => {
     const { gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const wmsApiUrl = `${kUrl}/wms`;
     const mapId = 'map-container-id';
-    const layerSettings = {
-        STYLES: 'heatmap',
-        LAYERS: 'demo.nyctaxi',
-        COLORMAP: 'magma',
-        BLUR_RADIUS: 5,
-        X_ATTR: 'pickup_longitude',
-        Y_ATTR: 'pickup_latitude',
-    };
 
     const [popupContent, setPopupContent] = useState(null);
     const [width, setWidth] = useState(window.innerWidth);
     const [mapRendered, setMapRendered] = useState(null);
-    const [olLayer, setOlLayer] = useState(null);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -58,9 +58,11 @@ const ExampleWmsOpenlayers = (props) => {
         })
     );
 
-    window.onresize = _ => {
-        setWidth(window.innerWidth);
-    };
+    useEffect(() => {
+        const handleResize = () => setWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         map.setTarget(mapId);
@@ -85,10 +87,6 @@ const ExampleWmsOpenlayers = (props) => {
 
     useEffect(() => {
         if (mapRendered && kUrl && gpudb) {
-            if (olLayer) {
-                map.getLayers().remove(olLayer);
-            }
-
             let requestParams = {
                 ...WMS_PARAMS,
                 ...layerSettings,
@@ -137,8 +135,12 @@ const ExampleWmsOpenlayers = (props) => {
             newOlLayer.setVisible(true);
 
             map.getLayers().push(newOlLayer);
-            setOlLayer(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
+        }
+    }, [map, mapRendered, kUrl, gpudb, wmsApiUrl, authUsername, authPassword]);
 
+    useEffect(() => {
+        if (mapRendered && gpudb) {
             const mapClickHandler = (evt) => {
                 const extent = evt.map.getView().calculateExtent(evt.map.getSize());
 
@@ -177,11 +179,10 @@ const ExampleWmsOpenlayers = (props) => {
                     }
                 );
             };
-            map.un('singleclick', mapClickHandler);
             map.on('singleclick', mapClickHandler);
+            return () => map.un('singleclick', mapClickHandler);
         }
-
-    }, [kUrl, mapRendered, gpudb]);
+    }, [map, mapRendered, gpudb, width]);
 
     useEffect(() => {
         map.setTarget(mapId);

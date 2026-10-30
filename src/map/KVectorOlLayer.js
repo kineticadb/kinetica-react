@@ -1,15 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import OlVectorTileLayer from 'ol/layer/VectorTile';
 import OlVectorTile from 'ol/source/VectorTile';
 import MVT from 'ol/format/MVT';
-
-function usePrevious(value) {
-    const ref = useRef();
-    useEffect(() => {
-        ref.current = value;
-    });
-    return ref.current;
-}
 
 const genTileLoadFunction = (authUsername, authPassword, setError, componentName) => {
     return (tile, url) => {
@@ -45,99 +37,91 @@ const genTileLoadFunction = (authUsername, authPassword, setError, componentName
 
 export const KVectorOlLayer = (props) => {
     const { id, label, map, kineticaSettings, style, visible, opacity, minZoom, maxZoom, vtsApiUrl, authUsername, authPassword, setError, index } = props;
-    const prevProps = usePrevious({ id, label, map, kineticaSettings, style, visible, opacity, minZoom, maxZoom, vtsApiUrl, authUsername, authPassword });
     const [olLayer, setOlLayer] = useState(null);
     const componentName = label ? `KVectorOlLayer-${label}` : 'KVectorOlLayer';
 
+    // Tile url for the layer's view, or null if kineticaSettings doesn't name a table
+    const tileUrl = useMemo(() => {
+        const { view, baseTable, attributes } = kineticaSettings || {};
+        if (!(baseTable || view) || vtsApiUrl == null) {
+            return null;
+        }
+        return `${vtsApiUrl}/${view || baseTable}/{z}/{x}/{y}?attributes=` + (attributes || []).toString();
+    }, [kineticaSettings, vtsApiUrl]);
+    const hasTileUrl = tileUrl != null;
+
+    // Map passes a new setError function on every render; read the latest through a ref so the
+    // layer isn't rebuilt each time
+    const setErrorRef = useRef(setError);
     useEffect(() => {
-        // Check if kineticaSettings is valid
-        if (!kineticaSettings) {
+        setErrorRef.current = setError;
+    });
+
+    // Values the layer is created with; later changes are applied by the update effects below
+    const initialRef = useRef();
+    initialRef.current = { tileUrl, style, opacity, minZoom, maxZoom, visible };
+
+    // Create the layer, and remove it when the map, url or credentials change or on unmount
+    useEffect(() => {
+        if (!map || !hasTileUrl || authUsername == null || authPassword == null) {
             return;
         }
 
-        // Create layer
-        const {
-            view,
-            baseTable,
-            attributes,
-        } = kineticaSettings;
-
-        if (!(baseTable || view)) {
-            return;
-        }
-
-        let olLayerExists = null;
-        map.getLayers().forEach(lyr => {
-            if (lyr.id === id) {
-                olLayerExists = lyr;
-            }
+        const { tileUrl, style, opacity, minZoom, maxZoom, visible } = initialRef.current;
+        const reportError = (name, msg) => setErrorRef.current(name, msg);
+        const vectorSource = new OlVectorTile({
+            format: new MVT(),
+            url: tileUrl,
+            tileLoadFunction: genTileLoadFunction(authUsername, authPassword, reportError, componentName),
         });
 
-        if (olLayer == null && olLayerExists != null) {
-            // Do nothing the layer has already been added to openlayers but react state was not updated
-        } else if (map == null) {
-            // Do nothing when map object does not exist
-        } else if (kineticaSettings == null || authUsername == null || authPassword == null) {
-            // Handle case of invalid data
-            if (olLayer) {
-                map.getLayers().remove(olLayer);
-            }
-        } else if (olLayer) {
-            if (
-                prevProps.kineticaSettings !== kineticaSettings ||
-                prevProps.vtsApiUrl !== vtsApiUrl ||
-                prevProps.authPassword !== authPassword ||
-                prevProps.authUsername !== authUsername
-            ) {
-                // Note: Add a timestamp to the url to prevent hitting the cache
-                olLayer.getSource().setUrl(`${vtsApiUrl}/${view}/{z}/{x}/{y}?attributes=${attributes.toString()}&chView=${new Date().getTime()}`);
-                olLayer.getSource().setTileLoadFunction(genTileLoadFunction(authUsername, authPassword, setError, componentName));
-            }
-            if (olLayer.getOpacity() !== (opacity / 100)) {
-                olLayer.setOpacity(opacity / 100);
-            }
-            if (olLayer.getMaxZoom() !== (maxZoom)) {
-                olLayer.setMaxZoom(maxZoom);
-            }
-            if (olLayer.getMinZoom() !== (minZoom)) {
-                olLayer.setMinZoom(minZoom);
-            }
-            if (olLayer.getVisible() !== visible) {
-                olLayer.setVisible(visible);
-            }
-        } else {
-            const vectorSource = new OlVectorTile({
-                format: new MVT(),
-                url: `${vtsApiUrl}/${view}/{z}/{x}/{y}?attributes=` + attributes.toString(),
-                tileLoadFunction: genTileLoadFunction(authUsername, authPassword, setError, componentName),
-            });
+        const newOlLayer = new OlVectorTileLayer({
+            declutter: true,
+            source: vectorSource,
+            style: style,
+            opacity: opacity / 100,
+            minZoom: minZoom,
+            maxZoom: maxZoom,
+            visible: visible,
+        });
 
-            const newOlLayer = new OlVectorTileLayer({
-                declutter: true,
-                source: vectorSource,
-                style: style,
-                opacity: opacity / 100,
-                minZoom: minZoom,
-                maxZoom: maxZoom,
-                visible: visible,
-            });
+        newOlLayer.id = id;
+        newOlLayer.kineticaTileUrl = tileUrl;
 
-            newOlLayer.id = id;
+        map.getLayers().insertAt(index + 1, newOlLayer);
+        setOlLayer(newOlLayer);
 
-            map.getLayers().insertAt(index + 1, newOlLayer);
-            setOlLayer(newOlLayer);
-        }
-    }, [map, kineticaSettings, visible, opacity, minZoom, maxZoom, vtsApiUrl, authUsername, authPassword]);
-
-    // Remove the map layer when this component is umounted
-    useEffect(() => {
         return () => {
-            setError(componentName, '');
-            if (map && olLayer) {
-                map.getLayers().remove(olLayer);
-            }
+            map.getLayers().remove(newOlLayer);
+            reportError(componentName, '');
+            setOlLayer(null);
         };
-    }, []);
+    }, [map, id, index, hasTileUrl, vtsApiUrl, authUsername, authPassword, componentName]);
+
+    // Point the existing layer at a changed view (e.g. after a filter)
+    useEffect(() => {
+        if (olLayer && tileUrl && olLayer.kineticaTileUrl !== tileUrl) {
+            // Note: Add a timestamp to the url to prevent hitting the cache
+            olLayer.getSource().setUrl(`${tileUrl}&chView=${new Date().getTime()}`);
+            olLayer.kineticaTileUrl = tileUrl;
+        }
+    }, [olLayer, tileUrl]);
+
+    useEffect(() => {
+        olLayer?.setOpacity(opacity / 100);
+    }, [olLayer, opacity]);
+
+    useEffect(() => {
+        olLayer?.setMinZoom(minZoom);
+    }, [olLayer, minZoom]);
+
+    useEffect(() => {
+        olLayer?.setMaxZoom(maxZoom);
+    }, [olLayer, maxZoom]);
+
+    useEffect(() => {
+        olLayer?.setVisible(visible);
+    }, [olLayer, visible]);
 
     return (
         <></>

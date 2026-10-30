@@ -15,7 +15,6 @@ const ExampleVtsOpenlayers = (props) => {
     const [infoStyle, setInfoStyle] = useState({});
     const [innerContent, setInnerContent] = useState(null);
     const [mapRendered, setMapRendered] = useState(false);
-    const [olLayer, setOlLayer] = useState(null);
 
     const [map] = useState(() =>
         new OlMap({
@@ -51,11 +50,6 @@ const ExampleVtsOpenlayers = (props) => {
 
     useEffect(() => {
         if (mapRendered && kUrl) {
-
-            if (olLayer) {
-                map.getLayers().remove(olLayer);
-            }
-
             // Layer settings
             const id = 'kineticaLayer-id1';
             const opacity = .9;
@@ -121,10 +115,9 @@ const ExampleVtsOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlLayer(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
         }
-
-    }, [kUrl, mapRendered]);
+    }, [map, mapRendered, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
         map.setTarget(mapId);

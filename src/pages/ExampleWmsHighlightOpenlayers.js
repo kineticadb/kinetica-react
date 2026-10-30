@@ -14,18 +14,17 @@ import {
     WMS_PARAMS,
 } from '../constants';
 
+// Rectangle in New York
+const wktgeom = 'POLYGON((-73.98460744139155 40.76405292603977,-73.98775793276715 40.75994370103416,-73.97872550054117 40.75602760679567,-73.9761382826348 40.76032095972252,-73.98460744139155 40.76405292603977))';
+
 const ExampleWmsSpatialFilterOpenlayers = (props) => {
     const { wmsLayer, gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const mapId = 'map-container-id';
 
-    // // Rectangle in New York
-    const wktgeom = 'POLYGON((-73.98460744139155 40.76405292603977,-73.98775793276715 40.75994370103416,-73.97872550054117 40.75602760679567,-73.9761382826348 40.76032095972252,-73.98460744139155 40.76405292603977))';
 
     const [mapRendered, setMapRendered] = useState(null);
-    const [olLayer, setOlLayer] = useState(null);
     const [selectedRequestParams, setSelectedRequestParams] = useState(null);
-    const [olSelectedLayer, setOlSelectedLayer] = useState(null);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -61,10 +60,6 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
 
     useEffect(() => {
         if (selectedRequestParams) {
-            if (olSelectedLayer) {
-                map.getLayers().remove(olSelectedLayer);
-            }
-
             const opacity = .9;
             const minZoom = 0;
             const maxZoom = 24
@@ -108,10 +103,9 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlSelectedLayer(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
         }
-
-    }, [selectedRequestParams]);
+    }, [map, selectedRequestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
         if (mapRendered && gpudb && kUrl && wmsLayer) {
@@ -123,10 +117,6 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                 X_ATTR: 'pickup_longitude',
                 Y_ATTR: 'pickup_latitude',
             };
-
-            if (olLayer) {
-                map.getLayers().remove(olLayer);
-            }
 
             let requestParams = {
                 ...WMS_PARAMS,
@@ -183,7 +173,8 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             newOlLayer.setVisible(true);
 
             map.getLayers().push(newOlLayer);
-            setOlLayer(newOlLayer);
+            // Ignore the view-creation result if this effect has been cleaned up by then
+            let cancelled = false;
 
             const randomNumber = Math.floor(Math.random() * 1000000000) + 1;
             // Creating a temp view name which will timeout after the ttl setting
@@ -200,6 +191,9 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                 [],
                 {},
                 (err, data) => {
+                    if (cancelled) {
+                        return;
+                    }
                     if (data) {
                         setSelectedRequestParams({
                             ...WMS_PARAMS,
@@ -216,9 +210,12 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                     }
                 }
             );
+            return () => {
+                cancelled = true;
+                map.getLayers().remove(newOlLayer);
+            };
         }
-
-    }, [wmsLayer, gpudb, kUrl, mapRendered]);
+    }, [map, wmsLayer, gpudb, kUrl, mapRendered, authUsername, authPassword]);
 
     useEffect(() => {
         map.setTarget(mapId);

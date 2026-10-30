@@ -49,9 +49,11 @@ function Map(props) {
     const [infoRadius, setInfoRadius] = useState(undefined);
     const [width, setWidth] = useState(window.innerWidth);
 
-    window.onresize = _ => {
-        setWidth(window.innerWidth);
-    };
+    useEffect(() => {
+        const handleResize = () => setWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         map.setTarget(mapId);

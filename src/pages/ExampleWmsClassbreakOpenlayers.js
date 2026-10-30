@@ -16,26 +16,26 @@ import {
 import { transform } from "ol/proj";
 
 
+const layerSettings = {
+    STYLES: "cb_raster",
+    LAYERS: "demo.nyctaxi",
+    X_ATTR: "pickup_longitude",
+    Y_ATTR: "pickup_latitude",
+    CB_ATTR: "tip_amount",
+    CB_VALS: "0.000:4.012,4.012:8.024,8.024:12.036,12.036:16.048,16.048:20.100",
+    POINTCOLORS: "ffdc8665,ff138086,ff534666,ffcd7672,ffeeb462",
+    POINTSHAPES: "square,square,circle,circle,diamond",
+    POINTSIZES: "4,10,8,16,4",
+};
+
 const ExampleWmsClassbreakOpenlayers = (props) => {
     const { gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const mapId = 'map-container-id';
-    const layerSettings = {
-        STYLES: "cb_raster",
-        LAYERS: "demo.nyctaxi",
-        X_ATTR: "pickup_longitude",
-        Y_ATTR: "pickup_latitude",
-        CB_ATTR: "tip_amount",
-        CB_VALS: "0.000:4.012,4.012:8.024,8.024:12.036,12.036:16.048,16.048:20.100",
-        POINTCOLORS: "ffdc8665,ff138086,ff534666,ffcd7672,ffeeb462",
-        POINTSHAPES: "square,square,circle,circle,diamond",
-        POINTSIZES: "4,10,8,16,4",
-    };
 
     const [popupContent, setPopupContent] = useState(null);
     const [width, setWidth] = useState(window.innerWidth);
     const [mapRendered, setMapRendered] = useState(false);
-    const [olLayer, setOlLayer] = useState(null);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -60,9 +60,11 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
         })
     );
 
-    window.onresize = _ => {
-        setWidth(window.innerWidth);
-    };
+    useEffect(() => {
+        const handleResize = () => setWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         map.setTarget(mapId);
@@ -87,11 +89,6 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
 
     useEffect(() => {
         if (mapRendered && kUrl && gpudb) {
-
-            if (olLayer) {
-                map.getLayers().remove(olLayer);
-            }
-
             // Layer settings
             const opacity = .9;
             const minZoom = 0;
@@ -142,8 +139,12 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlLayer(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
+        }
+    }, [map, mapRendered, kUrl, gpudb, authUsername, authPassword]);
 
+    useEffect(() => {
+        if (mapRendered && gpudb) {
             const mapClickHandler = (evt) => {
                 const extent = evt.map.getView().calculateExtent(evt.map.getSize());
 
@@ -182,11 +183,10 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
                     }
                 );
             };
-            map.un('singleclick', mapClickHandler);
             map.on('singleclick', mapClickHandler);
+            return () => map.un('singleclick', mapClickHandler);
         }
-
-    }, [kUrl, mapRendered, gpudb]);
+    }, [map, mapRendered, gpudb, width]);
 
     const closePopup = () => {
         setPopupContent('');

@@ -21,10 +21,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
 
     const [mapRendered, setMapRendered] = useState(null);
     const [heatmapRequestParams, setHeatmapRequestParams] = useState(null);
-    const [olLayerHeatmap, setOlLayerHeatmap] = useState(null);
-    const [olLayerH3_8, setOlLayerH3_8] = useState(null);
     const [h3_8RequestParams, setH3_8RequestParams] = useState(null);
-    const [olLayerH3_6, setOlLayerH3_6] = useState(null);
     const [h3_6RequestParams, setH3_6RequestParams] = useState(null);
     const [map] = useState(() =>
         new OlMap({
@@ -61,10 +58,6 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
 
     useEffect(() => {
         if (heatmapRequestParams) {
-            if (olLayerHeatmap) {
-                map.getLayers().remove(olLayerHeatmap);
-            }
-
             const opacity = .9;
             const minZoom = 15;
             const maxZoom = 24;
@@ -108,17 +101,12 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlLayerHeatmap(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
         }
-
-    }, [heatmapRequestParams]);
+    }, [map, heatmapRequestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
         if (h3_8RequestParams) {
-            if (olLayerH3_8) {
-                map.getLayers().remove(olLayerH3_8);
-            }
-
             const opacity = .9;
             const minZoom = 12;
             const maxZoom = 15;
@@ -162,18 +150,13 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlLayerH3_8(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
         }
-
-    }, [h3_8RequestParams]);
+    }, [map, h3_8RequestParams, kUrl, authUsername, authPassword]);
 
 
     useEffect(() => {
         if (h3_6RequestParams) {
-            if (olLayerH3_6) {
-                map.getLayers().remove(olLayerH3_6);
-            }
-
             const opacity = .9;
             const minZoom = 0;
             const maxZoom = 12;
@@ -217,13 +200,14 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
             newOlLayer.id = id;
 
             map.getLayers().push(newOlLayer);
-            setOlLayerH3_6(newOlLayer);
+            return () => map.getLayers().remove(newOlLayer);
         }
-
-    }, [h3_6RequestParams]);
+    }, [map, h3_6RequestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
         if (mapRendered && gpudb && kUrl && wmsLayer) {
+            // Ignore server results if this effect has been cleaned up by then
+            let cancelled = false;
             const layerSettings = {
                 STYLES: 'heatmap',
                 LAYERS: 'demo.nyctaxi',
@@ -247,6 +231,9 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 SHAPELINEWIDTHS: '2,2,2,2',
             };
             gpudb.show_table(newBoundaryLayerName, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_8) => {
+                if (cancelled) {
+                    return;
+                }
                 if (err) {
                     console.error('Error checking table', newBoundaryLayerName, err.message);
                     return;
@@ -276,6 +263,9 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                         [],
                         {},
                         (err, data) => {
+                            if (cancelled) {
+                                return;
+                            }
                             if (data) {
                                 setH3_8RequestParams(newH3_8RequestParams);
                             } else {
@@ -302,6 +292,9 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 SHAPELINEWIDTHS: '2,2,2,2',
             };
             gpudb.show_table(newBoundaryLayerName2, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_6) => {
+                if (cancelled) {
+                    return;
+                }
                 if (err) {
                     console.error('Error checking table', newBoundaryLayerName2, err.message);
                     return;
@@ -331,6 +324,9 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                         [],
                         {},
                         (err, data) => {
+                            if (cancelled) {
+                                return;
+                            }
                             if (data) {
                                 setH3_6RequestParams(newH3_6RequestParams);
                             } else {
@@ -352,8 +348,10 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 X_ATTR: layerSettings.X_ATTR,
                 Y_ATTR: layerSettings.Y_ATTR,
             });
+            return () => {
+                cancelled = true;
+            };
         }
-
     }, [wmsLayer, gpudb, kUrl, mapRendered]);
 
     useEffect(() => {
