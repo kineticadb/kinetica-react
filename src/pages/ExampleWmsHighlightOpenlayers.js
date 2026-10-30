@@ -5,6 +5,10 @@ import OlLayerTile from 'ol/layer/Tile';
 import OlSourceOSM from 'ol/source/OSM';
 import OlImage from 'ol/layer/Image';
 import OlImageWMS from 'ol/source/ImageWMS';
+import { Vector as VectorSource } from 'ol/source.js';
+import { Vector as VectorLayer } from 'ol/layer.js';
+import WKT from 'ol/format/WKT.js';
+import { Fill, Stroke, Style } from 'ol/style.js';
 
 import {
     base64ArrayBuffer,
@@ -17,11 +21,10 @@ import {
 // Rectangle in New York
 const wktgeom = 'POLYGON((-73.98460744139155 40.76405292603977,-73.98775793276715 40.75994370103416,-73.97872550054117 40.75602760679567,-73.9761382826348 40.76032095972252,-73.98460744139155 40.76405292603977))';
 
-const ExampleWmsSpatialFilterOpenlayers = (props) => {
+const ExampleWmsHighlightOpenlayers = (props) => {
     const { wmsLayer, gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const mapId = 'map-container-id';
-
 
     const [mapRendered, setMapRendered] = useState(null);
     const [selectedRequestParams, setSelectedRequestParams] = useState(null);
@@ -39,6 +42,30 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                         noWrap: false,
                     }),
                     className: 'ol_bw',
+                }),
+                // Outline of the polygon the highlighted records are filtered on; zIndex keeps it
+                // above the WMS layers added later, which would otherwise hide it
+                new VectorLayer({
+                    zIndex: 1,
+                    source: new VectorSource({
+                        features: [
+                            new WKT().readFeature(wktgeom, {
+                                dataProjection: 'EPSG:4326',
+                                featureProjection: 'EPSG:3857',
+                            }),
+                        ],
+                    }),
+                    style: [
+                        new Style({
+                            stroke: new Stroke({
+                                color: 'green',
+                                width: 6,
+                            }),
+                            fill: new Fill({
+                                color: 'rgba(0, 0, 255, 0.1)',
+                            }),
+                        }),
+                    ],
                 }),
             ],
             overlays: [],
@@ -229,4 +256,4 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
     </div>;
 };
 
-export default ExampleWmsSpatialFilterOpenlayers;
+export default ExampleWmsHighlightOpenlayers;

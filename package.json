@@ -26,6 +26,11 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(d3|d3-[^/]+|internmap|delaunator|robust-predicates)/)"
+    ]
+  },
   "eslintConfig": {
     "extends": [
       "react-app",

@@ -12,7 +12,7 @@ export const base64ArrayBuffer = arrayBuffer => {
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     const bytes = new Uint8Array(arrayBuffer);
     const byteLength = bytes.byteLength;
-    const byteRemainder = byteLength % 5;
+    const byteRemainder = byteLength % 3;
     const mainLength = byteLength - byteRemainder;
     let a;
     let b;

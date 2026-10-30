@@ -1,6 +1,7 @@
 // import './App.css';
 import React, { useEffect, useState } from 'react';
 import Map from '../map/Map'
+import { createLayerFiltersStmt } from '../filterHelper';
 
 
 
@@ -29,24 +30,6 @@ function ExampleApp(props) {
         }
         setErrorMsg(null);
     }, [vectorLayer, wmsLayer]);
-
-    const createLayerFiltersStmt = (expression, origTable, newViewName) => {
-        let _expr = expression;
-        if (_expr.endsWith(';')) {
-            _expr = _expr.substring(0, _expr.length - 1);
-        }
-        let stmt = `SELECT * FROM ${origTable}`;
-        if (_expr.length > 0) {
-            stmt += ' WHERE ';
-        }
-        if (_expr.length > 0) {
-            stmt += _expr;
-        }
-
-        stmt = `create or replace temp materialized view ${newViewName} as (${stmt}) using table properties (ttl=3)`;
-        return stmt;
-    };
-
 
     const applyFilter = () => {
         if (mapLayers && mapLayers.length > 0) {
