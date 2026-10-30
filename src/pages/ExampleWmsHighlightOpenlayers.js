@@ -5,8 +5,6 @@ import OlLayerTile from 'ol/layer/Tile';
 import OlSourceOSM from 'ol/source/OSM';
 import OlImage from 'ol/layer/Image';
 import OlImageWMS from 'ol/source/ImageWMS';
-import WKT from 'ol/format/WKT.js';
-import { Fill, Stroke, Style } from 'ol/style.js';
 
 import {
     base64ArrayBuffer,
@@ -23,29 +21,12 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
 
     // // Rectangle in New York
     const wktgeom = 'POLYGON((-73.98460744139155 40.76405292603977,-73.98775793276715 40.75994370103416,-73.97872550054117 40.75602760679567,-73.9761382826348 40.76032095972252,-73.98460744139155 40.76405292603977))';
-    const format = new WKT();
-    const feature = format.readFeature(wktgeom, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857',
-    });
-    const styles = [
-        new Style({
-            stroke: new Stroke({
-                color: 'green',
-                width: 6,
-            }),
-            fill: new Fill({
-                color: 'rgba(0, 0, 255, 0.1)',
-            }),
-        }),
-    ];
 
     const [mapRendered, setMapRendered] = useState(null);
-    const [requestParams, setRequestParams] = useState(null);
     const [olLayer, setOlLayer] = useState(null);
     const [selectedRequestParams, setSelectedRequestParams] = useState(null);
     const [olSelectedLayer, setOlSelectedLayer] = useState(null);
-    const [map] = useState(
+    const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
             pixelRatio: 1,
@@ -76,7 +57,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             map.setTarget(undefined);
             setMapRendered(false);
         };
-    }, []);
+    }, [map]);
 
     useEffect(() => {
         if (selectedRequestParams) {
@@ -244,7 +225,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
         return () => {
             map.setTarget(undefined);
         };
-    }, []);
+    }, [map]);
 
     return <div style={{ width: "100%", height: "100%" }}>
         <div id={mapId} className="map-container"></div>

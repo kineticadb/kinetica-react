@@ -84,25 +84,25 @@ export const KVectorOlLayer = (props) => {
             }
         } else if (olLayer) {
             if (
-                prevProps.kineticaSettings != kineticaSettings ||
-                prevProps.vtsApiUrl != vtsApiUrl ||
-                prevProps.authPassword != authPassword ||
-                prevProps.authUsername != authUsername
+                prevProps.kineticaSettings !== kineticaSettings ||
+                prevProps.vtsApiUrl !== vtsApiUrl ||
+                prevProps.authPassword !== authPassword ||
+                prevProps.authUsername !== authUsername
             ) {
                 // Note: Add a timestamp to the url to prevent hitting the cache
                 olLayer.getSource().setUrl(`${vtsApiUrl}/${view}/{z}/{x}/{y}?attributes=${attributes.toString()}&chView=${new Date().getTime()}`);
                 olLayer.getSource().setTileLoadFunction(genTileLoadFunction(authUsername, authPassword, setError, componentName));
             }
-            if (olLayer.getOpacity() != (opacity / 100)) {
+            if (olLayer.getOpacity() !== (opacity / 100)) {
                 olLayer.setOpacity(opacity / 100);
             }
-            if (olLayer.getMaxZoom() != (maxZoom)) {
+            if (olLayer.getMaxZoom() !== (maxZoom)) {
                 olLayer.setMaxZoom(maxZoom);
             }
-            if (olLayer.getMinZoom() != (minZoom)) {
+            if (olLayer.getMinZoom() !== (minZoom)) {
                 olLayer.setMinZoom(minZoom);
             }
-            if (olLayer.getVisible() != visible) {
+            if (olLayer.getVisible() !== visible) {
                 olLayer.setVisible(visible);
             }
         } else {

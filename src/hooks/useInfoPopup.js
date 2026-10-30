@@ -13,14 +13,15 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
     const [localInfoLayers, setLocalInfoLayers] = useState(infoLayers?.map(lyr => lyr));
     const [isLoading, setIsLoading] = useState(false);
 
+    const totalRecords = records?.total_number_of_records;
     useEffect(
         _ => {
             if (!isNaN(displayedPageNumber)
                 && displayedPageNumber >= 1
-                && displayedPageNumber <= (parseInt(records?.total_number_of_records / INFO_MODAL_FETCH_LIMIT) + 1)) {
+                && displayedPageNumber <= (parseInt(totalRecords / INFO_MODAL_FETCH_LIMIT) + 1)) {
                 setPageNumber(displayedPageNumber);
             }
-        }, [displayedPageNumber]
+        }, [displayedPageNumber, totalRecords]
     );
 
     useEffect(
@@ -74,7 +75,7 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
             setDisplayedPageNumber(1);
             setRecords(undefined);
         }
-    }, [localInfoLayers, radius, selectedLayer]);
+    }, [localInfoLayers, radius, selectedLayer, coordinate, gpudb]);
 
     useEffect(
         _ => {

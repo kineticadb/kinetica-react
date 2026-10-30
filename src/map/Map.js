@@ -20,7 +20,7 @@ function Map(props) {
     const mapId = 'map-container-id';
     const componentName = `map_${mapId}`;
 
-    const [map] = useState(
+    const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
             pixelRatio: 1, // Reduce Pixel ratio from default 1.5 to work on retina displays
@@ -70,9 +70,9 @@ function Map(props) {
         );
         return () => {
             map.setTarget(undefined);
-            setMapRendered(true);
+            setMapRendered(false);
         };
-    }, []);
+    }, [map]);
 
     const getClickRadius = useCallback(
         extent => {
@@ -176,6 +176,8 @@ function Map(props) {
             getClickRadius,
             openInfo,
             closeInfo,
+            componentName,
+            setError,
         ]
     );
     useEffect(() => {

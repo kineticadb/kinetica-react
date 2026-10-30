@@ -164,8 +164,7 @@ export const KWmsOlLayer = (props) => {
             }
         } else if (olLayer) {
             // Update
-            if (prevProps.kineticaSettings != kineticaSettings) {
-                const geoAttr = requestParams.GEO_ATTR;
+            if (prevProps.kineticaSettings !== kineticaSettings) {
                 if (requestParams.GEO_ATTR && requestParams.GEO_ATTR.length > 0) {
                     delete requestParams.X_ATTR;
                     delete requestParams.Y_ATTR;
@@ -176,23 +175,23 @@ export const KWmsOlLayer = (props) => {
                 olLayer.getSource().updateParams(requestParams);
             }
             if (
-                prevProps.wmsApiUrl != wmsApiUrl ||
-                prevProps.authPassword != authPassword ||
-                prevProps.authUsername != authUsername
+                prevProps.wmsApiUrl !== wmsApiUrl ||
+                prevProps.authPassword !== authPassword ||
+                prevProps.authUsername !== authUsername
             ) {
                 olLayer.getSource().setImageLoadFunction(genImageLoadFunction(authUsername, authPassword, setError, componentName));
                 olLayer.getSource().on('imageloaderror', genImageLoadErrorFunction(wmsApiUrl, authUsername, authPassword, requestParams, setError, componentName));
             }
-            if (olLayer.getOpacity() != (opacity / 100)) {
+            if (olLayer.getOpacity() !== (opacity / 100)) {
                 olLayer.setOpacity(opacity / 100);
             }
-            if (olLayer.getMaxZoom() != (maxZoom)) {
+            if (olLayer.getMaxZoom() !== (maxZoom)) {
                 olLayer.setMaxZoom(maxZoom);
             }
-            if (olLayer.getMinZoom() != (minZoom)) {
+            if (olLayer.getMinZoom() !== (minZoom)) {
                 olLayer.setMinZoom(minZoom);
             }
-            if (olLayer.getVisible() != visible) {
+            if (olLayer.getVisible() !== visible) {
                 olLayer.setVisible(visible);
             }
         } else {

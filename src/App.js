@@ -46,10 +46,10 @@ function App() {
 
   // Load Config
   useEffect(() => {
-    const request = kUser === null ? loadConfig() : null;
+    const request = loadConfig();
     // StrictMode mounts twice in development; abort the first request so the config (and the
     // wmsLayer object every example depends on) is only applied once
-    return () => request?.abort();
+    return () => request.abort();
   }, []);
 
   // Initialize GPUdb object

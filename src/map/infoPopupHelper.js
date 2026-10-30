@@ -51,7 +51,7 @@ const InfoPopupHelper = (function () {
             };
         },
         filterTableByRadius: async (gpudb, table, tableLonCol, tableLatCol, tableWktCol, lonCol, latCol, radius) => {
-            const spatialExpression = tableLonCol && tableLonCol != '' && tableLatCol && tableLatCol != '' ? infoDef.buildGeoDistExpr(lonCol, latCol, tableLonCol, tableLatCol, radius) :
+            const spatialExpression = tableLonCol && tableLonCol !== '' && tableLatCol && tableLatCol !== '' ? infoDef.buildGeoDistExpr(lonCol, latCol, tableLonCol, tableLatCol, radius) :
                 infoDef.buildSTXYDWithinExpr(lonCol, latCol, tableWktCol, radius);
 
             return await gpudb.filter(table, '', spatialExpression, {

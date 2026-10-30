@@ -36,7 +36,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
     const [width, setWidth] = useState(window.innerWidth);
     const [mapRendered, setMapRendered] = useState(false);
     const [olLayer, setOlLayer] = useState(null);
-    const [map] = useState(
+    const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
             pixelRatio: 1, // Reduce Pixel ratio from default 1.5 to work on retina displays
@@ -83,7 +83,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
             map.setTarget(undefined);
             setMapRendered(false);
         };
-    }, []);
+    }, [map]);
 
     useEffect(() => {
         if (mapRendered && kUrl && gpudb) {
@@ -198,12 +198,12 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
         return () => {
             map.setTarget(undefined);
         };
-    }, []);
+    }, [map]);
 
     return <div style={{ width: "100%", height: "100%" }}>
         <div id={mapId} className="map-container"></div>
         <div id="info" className="ol-popup">
-            <a href="#" id="popup-closer" className="ol-popup-closer" onClick={closePopup}></a>
+            <button type="button" id="popup-closer" className="ol-popup-closer" aria-label="Close" onClick={closePopup}></button>
             <div id="popup-content" style={{ maxHeight: "200px", overflow: "auto" }}>{popupContent}</div>
         </div>
     </div>;

@@ -442,6 +442,11 @@ code {
   position: absolute;
   top: 2px;
   right: 8px;
+  /* Rendered as a <button>; drop the default button chrome so only the ✖ shows */
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
 }
 
 .ol-popup-closer:after {

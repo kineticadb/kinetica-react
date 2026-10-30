@@ -26,7 +26,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
     const [h3_8RequestParams, setH3_8RequestParams] = useState(null);
     const [olLayerH3_6, setOlLayerH3_6] = useState(null);
     const [h3_6RequestParams, setH3_6RequestParams] = useState(null);
-    const [map] = useState(
+    const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
             pixelRatio: 1,
@@ -57,7 +57,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
             map.setTarget(undefined);
             setMapRendered(false);
         };
-    }, []);
+    }, [map]);
 
     useEffect(() => {
         if (heatmapRequestParams) {
@@ -361,7 +361,7 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
         return () => {
             map.setTarget(undefined);
         };
-    }, []);
+    }, [map]);
 
     return <div style={{ width: "100%", height: "100%" }}>
         <div id={mapId} className="map-container"></div>

@@ -30,7 +30,7 @@
    
    [ExampleApp.js](src/pages/ExampleApp.js) - Simple example map application using React components for Kinetica WMS, Kinetica VTS, and Info popup.
 
-   ### Kinetica Wep Map Service(WMS) React Component
+   ### Kinetica Web Map Service(WMS) React Component
    [KWmsOlLayer.js](src/map/KWmsOlLayer.js) is a react component used to render Kinetica's WMS layers on an Openlayers map.  The code uses the `ol/source/ImageWMS` object to make Kinetica WMS requests with basic authentication headers.  The requestParams property contains all the necessary parameters for the WMS request.  More details about the necessary Kinetica WMS parameters can be found here: [Kinetica WMS Documentation](https://docs.kinetica.com/7.2/feature_overview/wms_feature_overview/)
 
    The WMS layer configuration can be found in [config.json](public/config.json) under property `wmsLayer.kineticaSettings`.  The `kineticaSettings` objects is converted to Kinetica WMS request parameters in KWmsOlLayer.js
@@ -39,11 +39,13 @@
 
    [KVectorOlLayer.js](src/map/KVectorOlLayer.js) is a react component used to render Kinetica vector layers on an Openlayers map.  The code uses `ol/source/VectorTile` and configures the tileLoadFunction to make requests to Kinetica with basic authentication headers.  The `attributes` request parameter specifies the WKT column and any additional attributes to be included with each tile request.  These attributes can then be used for a map's info popup.  More details about Kinetica vector tiles can be found here: [Kinetica VTS Documentation](https://docs.kinetica.com/7.2/api/rest/vts_rest/)
 
-   The VTS layer configuration can be found in [config.json](public/config.json) under property `vectorLayer.kineticaSettings`.   The `kineticaSettings` object is converted to Kinetica VTS request parameters in KVectorOlLayers.js.
+   The VTS layer configuration can be found in [config.json](public/config.json) under property `vectorLayer.kineticaSettings`.   The `kineticaSettings` object is converted to Kinetica VTS request parameters in KVectorOlLayer.js.
 
    ### Kinetica Filter Function
 
    The `applyFilter` function in [ExampleApp.js](src/pages/ExampleApp.js) performs a filter on a Kinetica table and creates a view for the WMS or VTS layers to render on the map.
+
+   The WHERE clause typed into the filter box is inserted into the SQL statement as-is, so it can run any SQL the configured Kinetica user is allowed to run. That is fine for a local demo, but do not expose this example to untrusted users.
 
    ### Display Kinetica Column Data Functions
 
@@ -57,6 +59,8 @@
 
    1. Set kUrl to the kinetica url i.e. http(s)://localhost:9191
    2. Set kUser and kPass to a Kinetica user's username and password
+
+      **Note:** `config.json` is served to the browser, so anyone who can load the app can read these credentials. Use a dedicated Kinetica user with only the permissions the examples need: read access to the example tables, plus permission to create the views and tables some examples make. Never use an admin account outside a local demo.
    3. Import the nyctaxi demo data in GAdmin
       1. Navigate to GAdmin from your browser
       2. Click Cluster(top panel) 

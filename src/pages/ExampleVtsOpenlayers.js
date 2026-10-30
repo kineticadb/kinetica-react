@@ -17,7 +17,7 @@ const ExampleVtsOpenlayers = (props) => {
     const [mapRendered, setMapRendered] = useState(false);
     const [olLayer, setOlLayer] = useState(null);
 
-    const [map] = useState(
+    const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
             pixelRatio: 1, // Reduce Pixel ratio from default 1.5 to work on retina displays
@@ -47,7 +47,7 @@ const ExampleVtsOpenlayers = (props) => {
             map.setTarget(undefined);
             setMapRendered(false);
         };
-    }, []);
+    }, [map]);
 
     useEffect(() => {
         if (mapRendered && kUrl) {
@@ -164,7 +164,7 @@ const ExampleVtsOpenlayers = (props) => {
         return () => {
             map.setTarget(undefined);
         };
-    }, []);
+    }, [map]);
 
 
     return <div style={{ width: "100%", height: "100%" }}>

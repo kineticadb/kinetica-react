@@ -39,7 +39,7 @@ const InfoTemplate = (props) => {
             setRecordNumber(newRecordNumber);
             // Calculate the page number
             const newPageNumber = Math.floor(newRecordNumber / INFO_MODAL_FETCH_LIMIT) + 1;
-            if (pageNumber != newPageNumber) {
+            if (pageNumber !== newPageNumber) {
                 setPageNumber(newPageNumber);
             }
         }
@@ -52,7 +52,7 @@ const InfoTemplate = (props) => {
             setRecordNumber(newRecordNumber);
             // Calculate the page number
             const newPageNumber = Math.floor(newRecordNumber / INFO_MODAL_FETCH_LIMIT) + 1;
-            if (pageNumber != newPageNumber) {
+            if (pageNumber !== newPageNumber) {
                 setPageNumber(newPageNumber);
             }
         }
@@ -151,7 +151,7 @@ const InfoTemplate = (props) => {
                     </div>
                 </div>
                 <div className="card-footer">
-                    <a href="#" className="btn btn-primary" onClick={_ => close()}>Close</a>
+                    <button type="button" className="btn btn-primary" onClick={_ => close()}>Close</button>
                 </div>
             </div>)}
             {loadingPanel}

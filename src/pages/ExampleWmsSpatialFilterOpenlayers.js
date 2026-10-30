@@ -45,7 +45,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
     const [requestParams, setRequestParams] = useState(null);
     const [mapRendered, setMapRendered] = useState(null);
     const [olLayer, setOlLayer] = useState(null);
-    const [map] = useState(
+    const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
             pixelRatio: 1, // Reduce Pixel ratio from default 1.5 to work on retina displays
@@ -84,7 +84,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
             map.setTarget(undefined);
             setMapRendered(false);
         };
-    }, []);
+    }, [map]);
 
     useEffect(() => {
         if (requestParams) {
@@ -186,7 +186,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
         return () => {
             map.setTarget(undefined);
         };
-    }, []);
+    }, [map]);
 
     return <div style={{ width: "100%", height: "100%" }}>
         <div id={mapId} className="map-container"></div>
