@@ -1,6 +1,6 @@
    # Kinetica React/JavaScript Map Examples
 
-   This is an example project to show developers how to use Kinetica WMS, vector tiles, filters, and get/records with React and Openlayers. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).  
+   This is an example project to show developers how to use Kinetica WMS, vector tiles, filters, and get/records with React and Openlayers. This project is built with [Vite](https://vite.dev/) and requires Node.js 22.12 or newer.  
 
    ## WMS example 
    
@@ -78,19 +78,30 @@
 
    ## Running Application
 
-   In the project directory, you can run:
+   This project needs Node.js 22.12 or newer (see [.nvmrc](.nvmrc); with nvm, run `nvm use`). In the project directory, you can run:
 
    ### `npm install`
 
    Installs all the necessary node dependencies
 
-   ### `npm start`
+   ### `npm start` (or `npm run dev`)
 
-   Runs the app in the development mode.\
+   Runs the app in development mode with the Vite dev server.\
    Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-   ## Additional Scripts
-   [Create React Scripts](CREATE_REACT_APP.md)
+   If edits don't reload in the browser (common when the project is on a Windows drive under WSL), start it with `VITE_USE_POLLING=true npm start`.
+
+   ### `npm test`
+
+   Runs the unit tests with [Vitest](https://vitest.dev/) in watch mode. Use `npx vitest run` for a single run.
+
+   ### `npm run lint`
+
+   Checks the code with ESLint.
+
+   ### `npm run build`
+
+   Builds the app for production into the `dist` folder. `npm run preview` serves that build locally for a final check.
 
    ## Notes
 

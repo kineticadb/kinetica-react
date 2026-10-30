@@ -29,7 +29,7 @@ const InfoPopupHelper = (function () {
             if (queriedData == null) {
                 const data = await infoDef.filterTableByRadius(gpudb, view, lonColumn, latColumn, wktColumn, clickLon, clickLat, radius);
                 const { count } = data;
-                const { qualified_view_name } = data?.info;
+                const { qualified_view_name } = data.info;
                 if (count > 0) {
                     return {
                         ...layer,

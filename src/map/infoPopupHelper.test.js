@@ -2,8 +2,8 @@ import InfoPopupHelper from './infoPopupHelper';
 
 // Fake GPUdb client: filter() reports `count` records in a temp table, as the real synchronous call does
 const fakeGpudb = (count) => ({
-    filter: jest.fn(() => ({ count, info: { qualified_view_name: 'sys_temp.filter_1' } })),
-    clear_table: jest.fn(),
+    filter: vi.fn(() => ({ count, info: { qualified_view_name: 'sys_temp.filter_1' } })),
+    clear_table: vi.fn(),
 });
 
 describe('expression builders', () => {

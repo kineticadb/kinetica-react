@@ -1,4 +1,5 @@
 node_modules
+/dist
 
 # For Claude
 /CLAUDE.md
