@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GPUdb } from './lib/GPUdb';
 import * as $ from 'jquery';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -16,7 +16,6 @@ function App() {
   const [kUser, setKUser] = useState(null);
   const [kPass, setKPass] = useState(null);
   const [kUrl, setKUrl] = useState(null);
-  const [gpudb, setGpudb] = useState(undefined);
   const [wmsLayer, setWmsLayer] = useState(null);
   const [vectorLayer, setVectorLayer] = useState(null);
 
@@ -52,20 +51,17 @@ function App() {
     return () => request.abort();
   }, []);
 
-  // Initialize GPUdb object
-  useEffect(() => {
-    const options = {
+  // GPUdb client for the loaded config (undefined until it has a user); creating it doesn't
+  // contact the server
+  const gpudb = useMemo(() => {
+    if (kUser == null || kPass == null) {
+      return undefined;
+    }
+    return new GPUdb(kUrl, {
       timeout: 60000,
       username: kUser,
       password: kPass
-    };
-    if (kUser == null || kPass == null) {
-      console.log('No user available skipping');
-      return;
-    }
-
-    const gpudb = new GPUdb(kUrl, options);
-    setGpudb(gpudb);
+    });
   }, [kUrl, kPass, kUser]);
 
   return (

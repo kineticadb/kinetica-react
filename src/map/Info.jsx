@@ -50,6 +50,7 @@ const Info = props => {
             {
                 infoLayers && (
                     <InfoTemplate
+                        key={`${selectedLayer?.id}|${coordinate?.join(',')}`}
                         pageNumber={pageNumber}
                         displayedPageNumber={displayedPageNumber}
                         records={records}

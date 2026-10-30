@@ -1,5 +1,5 @@
 // import './App.css';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Map from '../map/Map'
 import { createLayerFiltersStmt } from '../filterHelper';
 
@@ -10,26 +10,15 @@ function ExampleApp(props) {
     const { kUser, kPass, kUrl, gpudb, vectorLayer, wmsLayer } = props;
     const [errorMsg, setErrorMsg] = useState(undefined);
     const [wmsErrorMsg, setWmsErrorMsg] = useState(undefined);
-    const [mapLayers, setMapLayers] = useState([]);
-    const [selectedTable, setSelectedTable] = useState(null);
+    // The view each layer has been filtered to by "Apply", by layer id
+    const [filteredViews, setFilteredViews] = useState({});
+    const [chosenTable, setChosenTable] = useState(null);
 
-
-    useEffect(() => {
-        const configMapLayers = [];
-        if (vectorLayer) {
-            configMapLayers.push(vectorLayer);
-        }
-
-        if (wmsLayer) {
-            configMapLayers.push(wmsLayer);
-        }
-
-        setMapLayers(configMapLayers);
-        if (configMapLayers.length > 0) {
-            setSelectedTable(configMapLayers[0].id);
-        }
-        setErrorMsg(null);
-    }, [vectorLayer, wmsLayer]);
+    // The config's layers, pointed at their filtered views
+    const mapLayers = useMemo(() => [vectorLayer, wmsLayer].filter(Boolean).map((lyr) => (
+        filteredViews[lyr.id] ? { ...lyr, kineticaSettings: { ...lyr.kineticaSettings, view: filteredViews[lyr.id] } } : lyr
+    )), [vectorLayer, wmsLayer, filteredViews]);
+    const selectedTable = chosenTable ?? mapLayers[0]?.id ?? null;
 
     const applyFilter = () => {
         if (mapLayers && mapLayers.length > 0) {
@@ -50,20 +39,7 @@ function ExampleApp(props) {
                 if (err) {
                     setErrorMsg(err.message);
                 } else {
-                    const newMapLayers = mapLayers.map((lyr, index) => {
-                        if (lyr.id === thisSelectTable) {
-                            return {
-                                ...lyr,
-                                kineticaSettings: {
-                                    ...lyr.kineticaSettings,
-                                    view: newView
-                                }
-                            };
-                        }
-                        return lyr;
-                    });
-
-                    setMapLayers(newMapLayers);
+                    setFilteredViews(views => ({ ...views, [thisSelectTable]: newView }));
                     setErrorMsg(null);
                 }
             });
@@ -76,7 +52,7 @@ function ExampleApp(props) {
     };
 
     const handleTableSelected = (e) => {
-        setSelectedTable(e.target.value);
+        setChosenTable(e.target.value);
     };
 
     const filterLayerOptions = mapLayers.map((lyr) => <option key={lyr.id} value={lyr.id}>{lyr.label}</option>);
@@ -95,7 +71,7 @@ function ExampleApp(props) {
             ) : null}
             <div className="filter-box">
                 <div className="form-group row">
-                    <label className="col-sm-1 col-form-label">
+                    <label htmlFor="where-field" className="col-sm-1 col-form-label">
                         Where Clause:
                     </label>
                     <div className="col-sm-8">

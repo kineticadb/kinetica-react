@@ -4,39 +4,42 @@ import {
 } from '../constants';
 import InfoPopupHelper from '../map/infoPopupHelper';
 
+// The layer the popup opens on: the first one that has data at the click
+const findLayerWithData = (infoLayers) => infoLayers?.find(lyr => !lyr.queriedData || lyr.qualified_view_name != null);
+
 export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, columns }) {
 
     const [pageNumber, setPageNumber] = useState(1);
     const [displayedPageNumber, setDisplayedPageNumber] = useState(1);
-    const [records, setRecords] = useState(undefined);
-    const [selectedLayer, setSelectedLayer] = useState(null);
+    // Records fetched for a WMS layer; vector layers carry their records with them
+    const [fetchedRecords, setFetchedRecords] = useState(undefined);
+    const [selectedLayer, setSelectedLayer] = useState(() => findLayerWithData(infoLayers));
     const [localInfoLayers, setLocalInfoLayers] = useState(infoLayers?.map(lyr => lyr));
     const [isLoading, setIsLoading] = useState(false);
 
-    const totalRecords = records?.total_number_of_records;
-    useEffect(
-        _ => {
-            if (!isNaN(displayedPageNumber)
-                && displayedPageNumber >= 1
-                && displayedPageNumber <= (parseInt(totalRecords / INFO_MODAL_FETCH_LIMIT) + 1)) {
-                setPageNumber(displayedPageNumber);
-            }
-        }, [displayedPageNumber, totalRecords]
-    );
+    // A new click (new infoLayers) starts over on the first layer with data. Adjusting state while
+    // rendering avoids first rendering the previous click's layer and records.
+    const [prevInfoLayers, setPrevInfoLayers] = useState(infoLayers);
+    if (infoLayers !== prevInfoLayers) {
+        setPrevInfoLayers(infoLayers);
+        setLocalInfoLayers(infoLayers?.map(lyr => lyr));
+        setSelectedLayer(findLayerWithData(infoLayers));
+        setPageNumber(1);
+        setDisplayedPageNumber(1);
+        setFetchedRecords(undefined);
+    }
 
-    useEffect(
-        () => {
-            const layerWithData = infoLayers?.find(lyr => !lyr.queriedData || lyr.qualified_view_name != null);
+    const records = selectedLayer?.vectorLayerType ? selectedLayer.records : fetchedRecords;
 
-            setLocalInfoLayers(infoLayers?.map(lyr => lyr));
-            setSelectedLayer(layerWithData);
-            setPageNumber(1);
-            setDisplayedPageNumber(1);
-            setRecords(undefined);
-        },
-        [infoLayers]
-    );
-
+    // Shows `page` and, when it is a valid page number, switches to it
+    const showPage = (page) => {
+        setDisplayedPageNumber(page);
+        if (!isNaN(page)
+            && page >= 1
+            && page <= (parseInt(records?.total_number_of_records / INFO_MODAL_FETCH_LIMIT) + 1)) {
+            setPageNumber(page);
+        }
+    };
 
     const handleLayerSelected = useCallback(async (layerId) => {
         const newSelectedLayerIndex = localInfoLayers.findIndex((lyr) => lyr.id === layerId);
@@ -52,7 +55,7 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
             setSelectedLayer(newSelectedLayer);
             setPageNumber(1);
             setDisplayedPageNumber(1);
-            setRecords(newSelectedLayer.records);
+            setFetchedRecords(undefined);
         } else if (newSelectedLayer.queriedData == null) {
             // Find data around the click first since the layer has not been queried yet
             setIsLoading(true);
@@ -63,7 +66,7 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
                 setSelectedLayer(newLayer);
                 setPageNumber(1);
                 setDisplayedPageNumber(1);
-                setRecords(undefined);
+                setFetchedRecords(undefined);
             } catch (error) {
                 console.error('Error querying layer', newSelectedLayer.view, error.message);
             } finally {
@@ -73,40 +76,41 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
             setSelectedLayer(newSelectedLayer);
             setPageNumber(1);
             setDisplayedPageNumber(1);
-            setRecords(undefined);
+            setFetchedRecords(undefined);
         }
     }, [localInfoLayers, radius, selectedLayer, coordinate, gpudb]);
 
+    // Fetch the selected WMS layer's records for the current page
     useEffect(
         _ => {
-            if (selectedLayer) {
-                if (selectedLayer.vectorLayerType) {
-                    setRecords(selectedLayer.records);
-                } else {
-                    let table = selectedLayer.qualified_view_name;
-                    async function fetchData(table, columns) {
-                        try {
-                            const records = await gpudb.get_records(
-                                table,
-                                (pageNumber - 1) * INFO_MODAL_FETCH_LIMIT,
-                                INFO_MODAL_FETCH_LIMIT,
-                                {}
-                            );
-                            setRecords(records);
-                        } catch (error) {
-                            console.error('Error getting records', table, error.message);
-                            setRecords(undefined);
-                        }
+            const table = selectedLayer?.qualified_view_name;
+            if (!gpudb || !table || selectedLayer.vectorLayerType) {
+                return;
+            }
+            // Ignore the result if the layer or page has changed by the time it arrives
+            let cancelled = false;
+            async function fetchData(table, columns) {
+                try {
+                    const records = await gpudb.get_records(
+                        table,
+                        (pageNumber - 1) * INFO_MODAL_FETCH_LIMIT,
+                        INFO_MODAL_FETCH_LIMIT,
+                        {}
+                    );
+                    if (!cancelled) {
+                        setFetchedRecords(records);
                     }
-
-                    if (gpudb && table) {
-                        fetchData(table, columns);
-                    } else {
-                        setRecords(undefined);
+                } catch (error) {
+                    console.error('Error getting records', table, error.message);
+                    if (!cancelled) {
+                        setFetchedRecords(undefined);
                     }
                 }
-
             }
+            fetchData(table, columns);
+            return () => {
+                cancelled = true;
+            };
         },
         [gpudb, selectedLayer, columns, pageNumber]
     );
@@ -135,7 +139,7 @@ export const useInfoPopup = function ({ gpudb, infoLayers, radius, coordinate, c
         handleLayerSelected,
         decrementPageNumber,
         incrementPageNumber,
-        setDisplayedPageNumber,
+        setDisplayedPageNumber: showPage,
         setPageNumber,
     };
 }

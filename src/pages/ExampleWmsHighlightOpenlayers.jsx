@@ -26,7 +26,6 @@ const ExampleWmsHighlightOpenlayers = (props) => {
 
     const mapId = 'map-container-id';
 
-    const [mapRendered, setMapRendered] = useState(null);
     const [selectedRequestParams, setSelectedRequestParams] = useState(null);
     const [map] = useState(() =>
         new OlMap({
@@ -78,10 +77,8 @@ const ExampleWmsHighlightOpenlayers = (props) => {
 
     useEffect(() => {
         map.setTarget(mapId);
-        setMapRendered(true);
         return () => {
             map.setTarget(undefined);
-            setMapRendered(false);
         };
     }, [map]);
 
@@ -135,7 +132,7 @@ const ExampleWmsHighlightOpenlayers = (props) => {
     }, [map, selectedRequestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
-        if (mapRendered && gpudb && kUrl && wmsLayer) {
+        if (gpudb && kUrl && wmsLayer) {
             const layerSettings = {
                 STYLES: 'heatmap',
                 LAYERS: 'demo.nyctaxi',
@@ -242,7 +239,7 @@ const ExampleWmsHighlightOpenlayers = (props) => {
                 map.getLayers().remove(newOlLayer);
             };
         }
-    }, [map, wmsLayer, gpudb, kUrl, mapRendered, authUsername, authPassword]);
+    }, [map, wmsLayer, gpudb, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
         map.setTarget(mapId);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     CaretLeftFill,
     CaretRightFill,
@@ -27,11 +27,8 @@ const InfoTemplate = (props) => {
         close
     } = props;
 
+    // Starts at the first record; Info remounts this component (via `key`) for a new layer or click
     const [recordNumber, setRecordNumber] = useState(0);
-
-    useEffect(() => {
-        setRecordNumber(0);
-    }, [selectedLayer, coordinate]);
 
     const decrementRecordNumber = () => {
         if (recordNumber > 0) {

@@ -43,7 +43,6 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
     ];
 
     const [requestParams, setRequestParams] = useState(null);
-    const [mapRendered, setMapRendered] = useState(null);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -78,10 +77,8 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
 
     useEffect(() => {
         map.setTarget(mapId);
-        setMapRendered(true);
         return () => {
             map.setTarget(undefined);
-            setMapRendered(false);
         };
     }, [map]);
 
@@ -135,7 +132,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
     }, [map, requestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
-        if (mapRendered && gpudb && kUrl && wmsLayer) {
+        if (gpudb && kUrl && wmsLayer) {
             const layerSettings = {
                 STYLES: 'heatmap',
                 LAYERS: 'demo.nyctaxi',
@@ -180,7 +177,7 @@ const ExampleWmsSpatialFilterOpenlayers = (props) => {
                 cancelled = true;
             };
         }
-    }, [wmsLayer, gpudb, kUrl, mapRendered]);
+    }, [wmsLayer, gpudb, kUrl]);
 
     useEffect(() => {
         map.setTarget(mapId);

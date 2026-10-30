@@ -20,6 +20,13 @@ export const ok = (data) => ({
     body: JSON.stringify({ status: 'OK', data_type: 'none', data: '', data_str: JSON.stringify(data), message: '' }),
 });
 
+// A failed Kinetica REST response; GPUdb.js passes `message` to the callback as an Error
+export const error = (message) => ({
+    status: 400,
+    contentType: 'application/json',
+    body: JSON.stringify({ status: 'ERROR', data_type: 'none', data: '', data_str: '', message }),
+});
+
 // A /get/records response returning `rows`
 export const records = (rows) => ok({
     table_name: '',

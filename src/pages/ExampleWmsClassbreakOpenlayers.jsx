@@ -35,7 +35,6 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
 
     const [popupContent, setPopupContent] = useState(null);
     const [width, setWidth] = useState(window.innerWidth);
-    const [mapRendered, setMapRendered] = useState(false);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -68,7 +67,6 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
 
     useEffect(() => {
         map.setTarget(mapId);
-        setMapRendered(true);
         map.addOverlay(
             new OlOverlay({
                 id: 'info',
@@ -83,12 +81,11 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
         );
         return () => {
             map.setTarget(undefined);
-            setMapRendered(false);
         };
     }, [map]);
 
     useEffect(() => {
-        if (mapRendered && kUrl && gpudb) {
+        if (kUrl && gpudb) {
             // Layer settings
             const opacity = .9;
             const minZoom = 0;
@@ -141,10 +138,10 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
             map.getLayers().push(newOlLayer);
             return () => map.getLayers().remove(newOlLayer);
         }
-    }, [map, mapRendered, kUrl, gpudb, authUsername, authPassword]);
+    }, [map, kUrl, gpudb, authUsername, authPassword]);
 
     useEffect(() => {
-        if (mapRendered && gpudb) {
+        if (gpudb) {
             const mapClickHandler = (evt) => {
                 const extent = evt.map.getView().calculateExtent(evt.map.getSize());
 
@@ -186,7 +183,7 @@ const ExampleWmsClassbreakOpenlayers = (props) => {
             map.on('singleclick', mapClickHandler);
             return () => map.un('singleclick', mapClickHandler);
         }
-    }, [map, mapRendered, gpudb, width]);
+    }, [map, gpudb, width]);
 
     const closePopup = () => {
         setPopupContent('');

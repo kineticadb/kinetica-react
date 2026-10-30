@@ -14,13 +14,32 @@ import {
     WMS_PARAMS,
 } from '../constants';
 
+const layerSettings = {
+    STYLES: 'heatmap',
+    LAYERS: 'demo.nyctaxi',
+    COLORMAP: 'magma',
+    BLUR_RADIUS: 5,
+    X_ATTR: 'pickup_longitude',
+    Y_ATTR: 'pickup_latitude',
+};
+
+// Heatmap shown at the highest zoom levels; it needs no server-side setup
+const heatmapLayerParams = {
+    ...WMS_PARAMS,
+    STYLES: layerSettings.STYLES,
+    LAYERS: layerSettings.LAYERS,
+    COLORMAP: layerSettings.COLORMAP,
+    BLUR_RADIUS: layerSettings.BLUR_RADIUS,
+    X_ATTR: layerSettings.X_ATTR,
+    Y_ATTR: layerSettings.Y_ATTR,
+};
+
 const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
     const { wmsLayer, gpudb, kUser: authUsername, kPass: authPassword, kUrl } = props;
 
     const mapId = 'map-container-id';
 
-    const [mapRendered, setMapRendered] = useState(null);
-    const [heatmapRequestParams, setHeatmapRequestParams] = useState(null);
+    const heatmapRequestParams = gpudb && kUrl && wmsLayer ? heatmapLayerParams : null;
     const [h3_8RequestParams, setH3_8RequestParams] = useState(null);
     const [h3_6RequestParams, setH3_6RequestParams] = useState(null);
     const [map] = useState(() =>
@@ -49,10 +68,8 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
 
     useEffect(() => {
         map.setTarget(mapId);
-        setMapRendered(true);
         return () => {
             map.setTarget(undefined);
-            setMapRendered(false);
         };
     }, [map]);
 
@@ -205,17 +222,9 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
     }, [map, h3_6RequestParams, kUrl, authUsername, authPassword]);
 
     useEffect(() => {
-        if (mapRendered && gpudb && kUrl && wmsLayer) {
+        if (gpudb && kUrl && wmsLayer) {
             // Ignore server results if this effect has been cleaned up by then
             let cancelled = false;
-            const layerSettings = {
-                STYLES: 'heatmap',
-                LAYERS: 'demo.nyctaxi',
-                COLORMAP: 'magma',
-                BLUR_RADIUS: 5,
-                X_ATTR: 'pickup_longitude',
-                Y_ATTR: 'pickup_latitude',
-            };
 
             const newBoundaryLayerName = 'demo.nyctaxi_h3_8_boundary';
             const newH3_8RequestParams = {
@@ -239,9 +248,11 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                     return;
                 }
                 console.log(showResultsH3_8);
-                // If the h3_8 table does not exist, create it
+                // If the h3_8 table does not exist, create it. Plain CREATE TABLE (not OR REPLACE) so a
+                // table another client created in the meantime is never replaced; Kinetica doesn't allow
+                // IF NOT EXISTS with CREATE TABLE ... AS.
                 if (showResultsH3_8.table_names.length < 1) {
-                    const createH3Cells1 = `CREATE OR REPLACE TABLE ${newBoundaryLayerName} AS
+                    const createH3Cells1 = `CREATE TABLE ${newBoundaryLayerName} AS
                         (
                             SELECT
                             h3_index,
@@ -266,7 +277,8 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                             if (cancelled) {
                                 return;
                             }
-                            if (data) {
+                            // "already exists" means another client created it after our check; use it
+                            if (data || /already exists/i.test(err.message)) {
                                 setH3_8RequestParams(newH3_8RequestParams);
                             } else {
                                 console.error('Error creating table', newBoundaryLayerName, err.message);
@@ -300,9 +312,11 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                     return;
                 }
                 console.log(showResultsH3_6);
-                // If the h3_6 table does not exist, create it
+                // If the h3_6 table does not exist, create it. Plain CREATE TABLE (not OR REPLACE) so a
+                // table another client created in the meantime is never replaced; Kinetica doesn't allow
+                // IF NOT EXISTS with CREATE TABLE ... AS.
                 if (showResultsH3_6.table_names.length < 1) {
-                    const createH3Cells2 = `CREATE OR REPLACE TABLE ${newBoundaryLayerName2} AS
+                    const createH3Cells2 = `CREATE TABLE ${newBoundaryLayerName2} AS
                         (
                             SELECT
                             h3_index,
@@ -327,7 +341,8 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                             if (cancelled) {
                                 return;
                             }
-                            if (data) {
+                            // "already exists" means another client created it after our check; use it
+                            if (data || /already exists/i.test(err.message)) {
                                 setH3_6RequestParams(newH3_6RequestParams);
                             } else {
                                 console.error('Error creating table', newBoundaryLayerName2, err.message);
@@ -339,20 +354,11 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 }
             });
 
-            setHeatmapRequestParams({
-                ...WMS_PARAMS,
-                STYLES: layerSettings.STYLES,
-                LAYERS: layerSettings.LAYERS,
-                COLORMAP: layerSettings.COLORMAP,
-                BLUR_RADIUS: layerSettings.BLUR_RADIUS,
-                X_ATTR: layerSettings.X_ATTR,
-                Y_ATTR: layerSettings.Y_ATTR,
-            });
             return () => {
                 cancelled = true;
             };
         }
-    }, [wmsLayer, gpudb, kUrl, mapRendered]);
+    }, [wmsLayer, gpudb, kUrl]);
 
     useEffect(() => {
         map.setTarget(mapId);

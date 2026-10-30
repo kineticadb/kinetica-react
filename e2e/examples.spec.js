@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockKinetica, ok, records, sqlDone, collectErrors, clickMap } from './kinetica-mock.js';
+import { mockKinetica, ok, error, records, sqlDone, collectErrors, clickMap } from './kinetica-mock.js';
 
 // Routes and dropdown labels, in the order Layout lists them
 const EXAMPLES = [
@@ -65,6 +65,29 @@ test.describe('server-side setup', () => {
             expect(count(calls, endpoint)).toBe(expected);
         });
     }
+
+    test('the zoom example never replaces an H3 table another client just created', async ({ page }) => {
+        const creationErrors = [];
+        page.on('console', message => { if (message.text().startsWith('Error creating table')) creationErrors.push(message.text()); });
+        const calls = await mockKinetica(page, {
+            // Both tables look missing at check time...
+            '/show/table': () => ok({ table_names: [] }),
+            // ...but another client creates them first, so our CREATE TABLE fails the way Kinetica does
+            '/execute/sql': (call) => {
+                const table = JSON.parse(call.body).statement.match(/TABLE (\S+)/)[1];
+                return error(`Table already exists: ${table} (TM/SMc:8120)`);
+            },
+        });
+        await page.goto('/exampleWmsMutlipleLayersAtDiffZooms');
+
+        await expect.poll(() => count(calls, '/execute/sql')).toBe(2);
+        for (const call of calls.filter(c => c.path === '/execute/sql')) {
+            expect(JSON.parse(call.body).statement).toMatch(/^CREATE TABLE demo\.nyctaxi_h3_[68]_boundary AS/);
+        }
+        // The existing tables are used: no creation errors, and the H3 layer for the opening zoom (12) is drawn
+        await expect.poll(() => calls.some(c => c.path === '/wms' && c.params.get('LAYERS') === 'demo.nyctaxi_h3_6_boundary')).toBe(true);
+        expect(creationErrors).toEqual([]);
+    });
 
     test('no WMS image is requested twice (layers are removed on cleanup)', async ({ page }) => {
         const calls = await mockKinetica(page);

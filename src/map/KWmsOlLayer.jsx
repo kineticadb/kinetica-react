@@ -143,9 +143,14 @@ export const KWmsOlLayer = (props) => {
         setErrorRef.current = setError;
     });
 
-    // Values the layer is created with; later changes are applied by the update effects below
+    // Values the layer is created with; later changes are applied by the update effects below.
+    // Declared before the create effect, so it runs first in each commit.
     const initialRef = useRef();
-    initialRef.current = { requestParams, opacity, minZoom, maxZoom, visible };
+    useEffect(() => {
+        initialRef.current = { requestParams, opacity, minZoom, maxZoom, visible };
+    });
+    // Request params the current layer is showing
+    const appliedParamsRef = useRef(null);
 
     // Create the layer, and remove it when the map, url or credentials change or on unmount
     useEffect(() => {
@@ -174,7 +179,7 @@ export const KWmsOlLayer = (props) => {
         });
 
         newOlLayer.id = id;
-        newOlLayer.kineticaRequestParams = requestParams;
+        appliedParamsRef.current = requestParams;
 
         map.getLayers().insertAt(index + 1, newOlLayer);
         setOlLayer(newOlLayer);
@@ -188,9 +193,9 @@ export const KWmsOlLayer = (props) => {
 
     // Apply changed settings (e.g. a filter switching the view) to the existing layer
     useEffect(() => {
-        if (olLayer && requestParams && olLayer.kineticaRequestParams !== requestParams) {
+        if (olLayer && requestParams && appliedParamsRef.current !== requestParams) {
             olLayer.getSource().updateParams(requestParams);
-            olLayer.kineticaRequestParams = requestParams;
+            appliedParamsRef.current = requestParams;
         }
     }, [olLayer, requestParams]);
 

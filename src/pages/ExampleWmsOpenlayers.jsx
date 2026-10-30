@@ -33,7 +33,6 @@ const ExampleWmsOpenlayers = (props) => {
 
     const [popupContent, setPopupContent] = useState(null);
     const [width, setWidth] = useState(window.innerWidth);
-    const [mapRendered, setMapRendered] = useState(null);
     const [map] = useState(() =>
         new OlMap({
             zoomControl: false,
@@ -66,7 +65,6 @@ const ExampleWmsOpenlayers = (props) => {
 
     useEffect(() => {
         map.setTarget(mapId);
-        setMapRendered(true);
         map.addOverlay(
             new OlOverlay({
                 id: 'info',
@@ -81,12 +79,11 @@ const ExampleWmsOpenlayers = (props) => {
         );
         return () => {
             map.setTarget(undefined);
-            setMapRendered(false);
         };
     }, [map]);
 
     useEffect(() => {
-        if (mapRendered && kUrl && gpudb) {
+        if (kUrl && gpudb) {
             let requestParams = {
                 ...WMS_PARAMS,
                 ...layerSettings,
@@ -137,10 +134,10 @@ const ExampleWmsOpenlayers = (props) => {
             map.getLayers().push(newOlLayer);
             return () => map.getLayers().remove(newOlLayer);
         }
-    }, [map, mapRendered, kUrl, gpudb, wmsApiUrl, authUsername, authPassword]);
+    }, [map, kUrl, gpudb, wmsApiUrl, authUsername, authPassword]);
 
     useEffect(() => {
-        if (mapRendered && gpudb) {
+        if (gpudb) {
             const mapClickHandler = (evt) => {
                 const extent = evt.map.getView().calculateExtent(evt.map.getSize());
 
@@ -182,7 +179,7 @@ const ExampleWmsOpenlayers = (props) => {
             map.on('singleclick', mapClickHandler);
             return () => map.un('singleclick', mapClickHandler);
         }
-    }, [map, mapRendered, gpudb, width]);
+    }, [map, gpudb, width]);
 
     useEffect(() => {
         map.setTarget(mapId);

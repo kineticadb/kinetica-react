@@ -57,9 +57,14 @@ export const KVectorOlLayer = (props) => {
         setErrorRef.current = setError;
     });
 
-    // Values the layer is created with; later changes are applied by the update effects below
+    // Values the layer is created with; later changes are applied by the update effects below.
+    // Declared before the create effect, so it runs first in each commit.
     const initialRef = useRef();
-    initialRef.current = { tileUrl, style, opacity, minZoom, maxZoom, visible };
+    useEffect(() => {
+        initialRef.current = { tileUrl, style, opacity, minZoom, maxZoom, visible };
+    });
+    // Tile url the current layer is showing
+    const appliedTileUrlRef = useRef(null);
 
     // Create the layer, and remove it when the map, url or credentials change or on unmount
     useEffect(() => {
@@ -86,7 +91,7 @@ export const KVectorOlLayer = (props) => {
         });
 
         newOlLayer.id = id;
-        newOlLayer.kineticaTileUrl = tileUrl;
+        appliedTileUrlRef.current = tileUrl;
 
         map.getLayers().insertAt(index + 1, newOlLayer);
         setOlLayer(newOlLayer);
@@ -100,10 +105,10 @@ export const KVectorOlLayer = (props) => {
 
     // Point the existing layer at a changed view (e.g. after a filter)
     useEffect(() => {
-        if (olLayer && tileUrl && olLayer.kineticaTileUrl !== tileUrl) {
+        if (olLayer && tileUrl && appliedTileUrlRef.current !== tileUrl) {
             // Note: Add a timestamp to the url to prevent hitting the cache
             olLayer.getSource().setUrl(`${tileUrl}&chView=${new Date().getTime()}`);
-            olLayer.kineticaTileUrl = tileUrl;
+            appliedTileUrlRef.current = tileUrl;
         }
     }, [olLayer, tileUrl]);
 

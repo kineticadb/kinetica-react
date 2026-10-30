@@ -43,7 +43,6 @@ function Map(props) {
             }),
         })
     );
-    const [mapRendered, setMapRendered] = useState(false);
     const [infoCoordinate, setInfoCoordinate] = useState(undefined);
     const [infoLayers, setInfoLayers] = useState(undefined);
     const [infoRadius, setInfoRadius] = useState(undefined);
@@ -57,7 +56,6 @@ function Map(props) {
 
     useEffect(() => {
         map.setTarget(mapId);
-        setMapRendered(true);
         map.addOverlay(
             new OlOverlay({
                 id: `info`,
@@ -72,7 +70,6 @@ function Map(props) {
         );
         return () => {
             map.setTarget(undefined);
-            setMapRendered(false);
         };
     }, [map]);
 
@@ -189,7 +186,7 @@ function Map(props) {
         }
     }, [map, handleMapClick]);
 
-    const layersRender = (map && mapRendered && kUrl &&
+    const layersRender = (map && kUrl &&
         kUser && kPass && mapLayers ?
         mapLayers.map((lyr, index) => lyr.kineticaSettings.renderType != null ? <KWmsOlLayer
             key={lyr.id}
