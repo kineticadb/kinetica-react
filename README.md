@@ -95,6 +95,10 @@
 
    Runs the unit tests with [Vitest](https://vitest.dev/) in watch mode. Use `npx vitest run` for a single run.
 
+   ### `npm run e2e`
+
+   Runs the end-to-end tests with [Playwright](https://playwright.dev/) against both the dev server and a production build. Kinetica is mocked in these tests, so no database or credentials are needed. Before the first run, install the browser with `npx playwright install chromium`.
+
    ### `npm run lint`
 
    Checks the code with ESLint.

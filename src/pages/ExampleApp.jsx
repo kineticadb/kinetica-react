@@ -110,7 +110,7 @@ function ExampleApp(props) {
                     <div className="col-sm-2">
                         <select
                             name="tableSelectedField"
-                            className="form-control"
+                            className="form-select"
                             id="table-select-field"
                             value={selectedTable ?? ''}
                             onChange={handleTableSelected}

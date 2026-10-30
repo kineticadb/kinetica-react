@@ -13,6 +13,8 @@ export default defineConfig({
     },
     preview: { port: 3000, strictPort: true },
     test: {
+        // Unit tests only; e2e/ holds the Playwright suite (npm run e2e)
+        include: ['src/**/*.test.{js,jsx}'],
         environment: 'jsdom',
         globals: true,
         setupFiles: './src/setupTests.js',

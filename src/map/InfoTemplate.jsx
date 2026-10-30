@@ -89,7 +89,7 @@ const InfoTemplate = (props) => {
         <div style={{ "height": "323px" }}>
             {!isLoading && selectedLayer && (<div className="card ">
                 <div className="card-header">
-                    <h4 className="my-0 font-weight-normal">{selectedLayer?.label}</h4>
+                    <h4 className="my-0 fw-normal">{selectedLayer?.label}</h4>
                 </div>
                 <div className="card-body" style={{ "height": "283px", overflow: "scroll" }}>
                     <div className="text-center">
