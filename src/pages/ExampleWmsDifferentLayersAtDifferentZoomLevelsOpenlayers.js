@@ -246,42 +246,47 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 SHAPELINECOLORS: 'ffb43457,ffe35933,fff99a13,fffadb58',
                 SHAPELINEWIDTHS: '2,2,2,2',
             };
-            const showResultsH3_8 = gpudb.show_table(newBoundaryLayerName, {'no_error_if_not_exists': 'true'});
-            console.log(showResultsH3_8);
-            // If the h3_8 table does not exist, create it
-            if (showResultsH3_8.table_names.length < 1) {
-                const createH3Cells1 = `CREATE OR REPLACE TABLE ${newBoundaryLayerName} AS
-                    (
-                        SELECT
-                        h3_index,
-                        H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
-                        COUNT(*) AS total_pickups
-                        FROM (SELECT
-                            pickup_latitude,
-                            pickup_longitude,
-                            H3_XYTOCELL(pickup_longitude, pickup_latitude, 8) AS h3_index
-                            FROM demo.nyctaxi)
-                        GROUP BY h3_index
-                        
-                    )`;
-                gpudb.execute_sql(
-                    createH3Cells1,
-                    0,
-                    1,
-                    null,
-                    [],
-                    {},
-                    (err, data) => {
-                        if (data) {
-                            setH3_8RequestParams(newH3_8RequestParams);
-                        } else {
-                            console.error('Error creating table', newBoundaryLayerName, err.message);
+            gpudb.show_table(newBoundaryLayerName, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_8) => {
+                if (err) {
+                    console.error('Error checking table', newBoundaryLayerName, err.message);
+                    return;
+                }
+                console.log(showResultsH3_8);
+                // If the h3_8 table does not exist, create it
+                if (showResultsH3_8.table_names.length < 1) {
+                    const createH3Cells1 = `CREATE OR REPLACE TABLE ${newBoundaryLayerName} AS
+                        (
+                            SELECT
+                            h3_index,
+                            H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
+                            COUNT(*) AS total_pickups
+                            FROM (SELECT
+                                pickup_latitude,
+                                pickup_longitude,
+                                H3_XYTOCELL(pickup_longitude, pickup_latitude, 8) AS h3_index
+                                FROM demo.nyctaxi)
+                            GROUP BY h3_index
+
+                        )`;
+                    gpudb.execute_sql(
+                        createH3Cells1,
+                        0,
+                        1,
+                        null,
+                        [],
+                        {},
+                        (err, data) => {
+                            if (data) {
+                                setH3_8RequestParams(newH3_8RequestParams);
+                            } else {
+                                console.error('Error creating table', newBoundaryLayerName, err.message);
+                            }
                         }
-                    }
-                );
-            } else {
-                setH3_8RequestParams(newH3_8RequestParams);
-            }
+                    );
+                } else {
+                    setH3_8RequestParams(newH3_8RequestParams);
+                }
+            });
 
             const newBoundaryLayerName2 = 'demo.nyctaxi_h3_6_boundary';
             const newH3_6RequestParams = {
@@ -296,42 +301,47 @@ const ExampleWmsDifferentLayersAtDifferentZoomLevelsOpenlayers = (props) => {
                 SHAPELINECOLORS: 'ffb43457,ffe35933,fff99a13,fffadb58',
                 SHAPELINEWIDTHS: '2,2,2,2',
             };
-            const showResultsH3_6 = gpudb.show_table(newBoundaryLayerName2, {'no_error_if_not_exists': 'true'});
-            console.log(showResultsH3_6);
-            // If the h3_6 table does not exist, create it
-            if (showResultsH3_6.table_names.length < 1) {
-                const createH3Cells2 = `CREATE OR REPLACE TABLE ${newBoundaryLayerName2} AS
-                    (
-                        SELECT
-                        h3_index,
-                        H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
-                        COUNT(*) AS total_pickups
-                        FROM (SELECT
-                            pickup_latitude,
-                            pickup_longitude,
-                            H3_XYTOCELL(pickup_longitude, pickup_latitude, 6) AS h3_index
-                            FROM demo.nyctaxi)
-                        GROUP BY h3_index
-                        
-                    )`;
-                gpudb.execute_sql(
-                    createH3Cells2,
-                    0,
-                    1,
-                    null,
-                    [],
-                    {},
-                    (err, data) => {
-                        if (data) {
-                            setH3_6RequestParams(newH3_6RequestParams);
-                        } else {
-                            console.error('Error creating table', newBoundaryLayerName2, err.message);
+            gpudb.show_table(newBoundaryLayerName2, {'no_error_if_not_exists': 'true'}, (err, showResultsH3_6) => {
+                if (err) {
+                    console.error('Error checking table', newBoundaryLayerName2, err.message);
+                    return;
+                }
+                console.log(showResultsH3_6);
+                // If the h3_6 table does not exist, create it
+                if (showResultsH3_6.table_names.length < 1) {
+                    const createH3Cells2 = `CREATE OR REPLACE TABLE ${newBoundaryLayerName2} AS
+                        (
+                            SELECT
+                            h3_index,
+                            H3_CELLTOBOUNDARY(h3_index) AS h3_cell,
+                            COUNT(*) AS total_pickups
+                            FROM (SELECT
+                                pickup_latitude,
+                                pickup_longitude,
+                                H3_XYTOCELL(pickup_longitude, pickup_latitude, 6) AS h3_index
+                                FROM demo.nyctaxi)
+                            GROUP BY h3_index
+
+                        )`;
+                    gpudb.execute_sql(
+                        createH3Cells2,
+                        0,
+                        1,
+                        null,
+                        [],
+                        {},
+                        (err, data) => {
+                            if (data) {
+                                setH3_6RequestParams(newH3_6RequestParams);
+                            } else {
+                                console.error('Error creating table', newBoundaryLayerName2, err.message);
+                            }
                         }
-                    }
-                );
-            } else {
-                setH3_6RequestParams(newH3_6RequestParams);
-            }
+                    );
+                } else {
+                    setH3_6RequestParams(newH3_6RequestParams);
+                }
+            });
 
             setHeatmapRequestParams({
                 ...WMS_PARAMS,

@@ -8,7 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "bootstrap": "5.3.2",
     "d3": "^7.8.2",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.7.10",
     "jquery": "3.7.1",
     "ol": "7.5.2",
     "react": "^18.2.0",
@@ -16,6 +16,7 @@
     "react-bootstrap-icons": "^1.0.0",
     "react-data-grid": "^7.0.0-beta.46",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.30.6",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -43,8 +44,12 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "node-stdlib-browser": "^1.2.0",
-    "react-router-dom": "^6.26.1"
+  "overrides": {
+    "jsonpath": {
+      "underscore": "^1.13.8"
+    },
+    "sockjs": {
+      "uuid": "^11.1.1"
+    }
   }
 }
